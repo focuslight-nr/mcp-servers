@@ -34,7 +34,8 @@ flowchart LR
 
 Package: `packages/gaia-readonly-collector`
 
-- Exposes only `show_dns`, `show_dhcp`, and `show_date_time`.
+- Exposes `show_dns`, `show_dhcp`, `show_date_time`, and the fixed aggregate `show_hardening_state`.
+- The hardening snapshot uses only allowlisted official Gaia show APIs for version, users, roles, password policy, allowed clients, SNMP, syslog, and BGP configuration.
 - Rejects targets not listed in `GAIA_ALLOWED_TARGETS`.
 - Requires TLS certificate verification and supports a configured CA file.
 - Resolves credentials from process environment profiles rather than MCP arguments.
@@ -47,7 +48,7 @@ Package: `packages/baseline-audit`
 - Accepts normalized observations or raw MCP responses.
 - Validates strict Baseline Format v1 documents and rejects unknown fields.
 - Supports organization-authored baselines through a non-executable declarative assertion language.
-- Bundles only an independently authored example baseline; third-party benchmark content is not included.
+- Bundles independently authored example profiles; third-party benchmark publications are not included.
 - Produces deterministic `PASS`, `FAIL`, `MANUAL`, `ERROR`, and `EXEMPTED` results.
 - Persists audit history and reports regressions and improvements.
 - Supports scoped, expiring exceptions without converting them into passes.
@@ -87,7 +88,7 @@ Automated configuration should be implemented later as a separate component with
 
 The following checks do not require a Check Point device and have been completed:
 
-- Gaia Read-only Collector tests: 8 passing.
+- Gaia Read-only Collector unit and stdio tests.
 - Security Baseline Audit MCP unit and stdio integration tests.
 - Baseline Audit Runner unit and fixture integration tests.
 - Real stdio MCP client/server exchanges.
@@ -106,7 +107,7 @@ The following require a lab or production-approved Check Point environment:
 
 ## Baseline content
 
-This repository does not include third-party benchmark publications or derived control definitions. The supplied organization example is independently authored to demonstrate the format and engine.
+This repository does not include third-party benchmark publications. It includes independently authored examples and a concise profile based on public Check Point hardening guidance. The profile links to, but does not replace or reproduce, the official guide and is not an official Check Point certification.
 
 Users who load external baseline content are responsible for obtaining it lawfully, complying with its license and trademark terms, and validating that the implemented assertions accurately represent their intended policy. An audit result is evidence from the supplied observations, not a product certification.
 

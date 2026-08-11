@@ -26,6 +26,7 @@ export function buildObservationDocument(input: {
       ntpEnabled: input.gaia.ntpEnabled,
       ntpServers: input.gaia.ntpServers,
       timezone: input.gaia.timezone,
+      hardening: input.gaia.hardening,
     };
   }
   if (input.rules) {

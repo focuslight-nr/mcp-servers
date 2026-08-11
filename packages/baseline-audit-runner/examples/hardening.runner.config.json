@@ -1,0 +1,38 @@
+{
+  "concurrency": 1,
+  "retries": 0,
+  "retryDelayMs": 1000,
+  "toolTimeoutMs": 60000,
+  "stateDirectory": "./hardening-state",
+  "reportDirectory": "./hardening-reports",
+  "baselinePath": "../../baseline-audit/examples/baselines/checkpoint-gaia-gateway-hardening-2026.json",
+  "notifications": {
+    "enabled": false,
+    "webhookUrlEnvironment": "BASELINE_AUDIT_WEBHOOK_URL",
+    "notifyOn": ["NON_COMPLIANT", "REGRESSION", "PARTIAL", "ERROR"],
+    "timeoutMs": 10000
+  },
+  "mcp": {
+    "gaia": {},
+    "management": {},
+    "audit": {}
+  },
+  "targets": [
+    {
+      "id": "gateway-tokyo-01",
+      "gatewayIp": "192.0.2.10",
+      "gatewayPort": 443,
+      "policyPackage": "Standard",
+      "accessLayer": "Network",
+      "parameters": {
+        "gatewayObjectName": "Tokyo-Gateway",
+        "recommendedReleaseAndJhfConfirmed": true,
+        "impliedRulesReviewed": true,
+        "dynamicRoutingReviewed": true,
+        "expertModeGovernanceConfirmed": true,
+        "lomIsolationConfirmed": true
+      },
+      "enabled": true
+    }
+  ]
+}

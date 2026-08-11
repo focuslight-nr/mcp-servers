@@ -4,7 +4,7 @@ Deterministic command-line orchestrator for scheduled, read-only Check Point bas
 
 The Runner starts the Gaia, Management, and Baseline Audit MCP servers over stdio, collects raw observations, asks the Audit MCP to evaluate and persist them, writes JSON and Markdown reports, and returns scheduler-friendly exit codes. It does not modify Check Point state and does not use an LLM to decide compliance.
 
-Set the required `baselinePath` to an organization-authored Baseline Format v1 JSON document. No benchmark content is bundled with the Runner.
+Set the required `baselinePath` to a Baseline Format v1 JSON document. The Runner does not embed baseline content; the Audit package includes organization and independently authored Check Point hardening examples.
 
 ## Commands
 
@@ -23,6 +23,16 @@ baseline-audit-runner run-once \
 ```
 
 Fixture mode skips Gaia and Management MCP and still calls the real Baseline Audit MCP, including local history and diff generation.
+
+The supplied Check Point hardening profile can be exercised with synthetic data:
+
+```shell
+baseline-audit-runner run-once \
+  --config ./examples/hardening.runner.config.json \
+  --fixture-dir ./examples/fixtures
+```
+
+The confirmation parameters in this example are synthetic. In production they must come from an approved evidence workflow; setting a confirmation flag without evidence does not constitute a security review.
 
 ## Workflow
 
@@ -80,7 +90,7 @@ The baseline path and optional target parameters are resolved from the configura
 
 The Runner reads the baseline as JSON and sends it inline to the audit MCP. The audit MCP validates it before every evaluation. Do not put credentials or executable content in a baseline file.
 
-The Runner starts only collectors declared by the required baseline `inputs` array. Supported IDs are `gaia.dns`, `gaia.dhcp`, `gaia.dateTime`, and `management.accessRulebase`. `accessLayer` is required only when the Management input is selected.
+The Runner starts only collectors declared by the required baseline `inputs` array. Supported IDs are `gaia.dns`, `gaia.dhcp`, `gaia.dateTime`, `gaia.hardening`, and `management.accessRulebase`. `accessLayer` is required only when the Management input is selected. Fixture mode reads `TARGET.hardening.json` for `gaia.hardening`.
 
 MCP commands default to the locally built sibling packages:
 

@@ -1,0 +1,374 @@
+{
+  "$schema": "../../schemas/baseline-format-v1.schema.json",
+  "formatVersion": "1.0",
+  "baseline": {
+    "id": "checkpoint-gaia-gateway-hardening-2026",
+    "version": "2026.1",
+    "title": "Community Gaia Gateway Hardening Profile 2026",
+    "description": "Independently authored audit profile based on the public Check Point Gateway and Management Hardening Administration Guide. It summarizes selected recommendations and does not reproduce or replace the official guide.",
+    "vendor": "Independent profile for Check Point Gaia",
+    "platform": "Check Point Gaia R81.20, R82, and R82.10"
+  },
+  "inputs": ["gaia.hardening", "management.accessRulebase"],
+  "controls": [
+    {
+      "id": "CP-HARD-001",
+      "title": "Installed Gaia version is identified",
+      "severity": "high",
+      "expected": "Product version, OS build, and kernel version are observable",
+      "assertion": {
+        "all": [
+          { "path": "gaia.hardening.productVersion", "operator": "exists" },
+          { "path": "gaia.hardening.osBuild", "operator": "exists" },
+          { "path": "gaia.hardening.osKernelVersion", "operator": "exists" }
+        ]
+      },
+      "onMissing": "MANUAL"
+    },
+    {
+      "id": "CP-HARD-002",
+      "title": "Release and Jumbo Hotfix are currently recommended",
+      "severity": "critical",
+      "expected": "External lifecycle lookup confirms a supported release and recommended JHF Take",
+      "assertion": {
+        "path": "parameters.recommendedReleaseAndJhfConfirmed",
+        "operator": "equals",
+        "value": true
+      },
+      "onMissing": "MANUAL",
+      "remediation": { "action": "manual.reviewRecommendedReleaseAndJhf" }
+    },
+    {
+      "id": "CP-HARD-003",
+      "title": "Gaia users use restricted or disabled shells",
+      "severity": "critical",
+      "expected": "Every Gaia account uses cli or no-login",
+      "assertion": {
+        "all": [
+          {
+            "path": "gaia.hardening.users",
+            "operator": "minItems",
+            "value": 1
+          },
+          {
+            "path": "gaia.hardening.users",
+            "operator": "allMatch",
+            "evidencePath": "name",
+            "where": {
+              "any": [
+                {
+                  "path": "shell",
+                  "operator": "equals",
+                  "value": "cli",
+                  "caseInsensitive": true
+                },
+                {
+                  "path": "shell",
+                  "operator": "equals",
+                  "value": "no-login",
+                  "caseInsensitive": true
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "onMissing": "MANUAL",
+      "remediation": { "action": "gaia.reviewUserShells" }
+    },
+    {
+      "id": "CP-HARD-004",
+      "title": "Password strength and history are hardened",
+      "severity": "high",
+      "expected": "Minimum length 10, complexity 4, palindrome checking and history enabled",
+      "assertion": {
+        "all": [
+          {
+            "path": "gaia.hardening.passwordPolicy.minimumLength",
+            "operator": "greaterThanOrEqual",
+            "value": 10
+          },
+          {
+            "path": "gaia.hardening.passwordPolicy.complexity",
+            "operator": "greaterThanOrEqual",
+            "value": 4
+          },
+          {
+            "path": "gaia.hardening.passwordPolicy.palindromeCheckEnabled",
+            "operator": "equals",
+            "value": true
+          },
+          {
+            "path": "gaia.hardening.passwordPolicy.historyCheckEnabled",
+            "operator": "equals",
+            "value": true
+          }
+        ]
+      },
+      "onMissing": "MANUAL",
+      "remediation": { "action": "gaia.planPasswordPolicyHardening" }
+    },
+    {
+      "id": "CP-HARD-005",
+      "title": "Password expiration and dormant account lockout are hardened",
+      "severity": "high",
+      "expected": "Passwords expire within 90 days, expire-lockout within 1 day, and unused accounts lock within 30 days",
+      "assertion": {
+        "all": [
+          {
+            "path": "gaia.hardening.passwordPolicy.passwordExpirationDays",
+            "operator": "lessThanOrEqual",
+            "value": 90
+          },
+          {
+            "path": "gaia.hardening.passwordPolicy.expirationLockoutDays",
+            "operator": "lessThanOrEqual",
+            "value": 1
+          },
+          {
+            "path": "gaia.hardening.passwordPolicy.lockUnusedAccountsEnabled",
+            "operator": "equals",
+            "value": true
+          },
+          {
+            "path": "gaia.hardening.passwordPolicy.inactivityThresholdDays",
+            "operator": "lessThanOrEqual",
+            "value": 30
+          }
+        ]
+      },
+      "onMissing": "MANUAL",
+      "remediation": { "action": "gaia.planPasswordPolicyHardening" }
+    },
+    {
+      "id": "CP-HARD-006",
+      "title": "Failed login lockout is hardened",
+      "severity": "high",
+      "expected": "Lockout enabled for admin, at most 5 attempts, for at least 7200 seconds",
+      "assertion": {
+        "all": [
+          {
+            "path": "gaia.hardening.passwordPolicy.failedLockEnabled",
+            "operator": "equals",
+            "value": true
+          },
+          {
+            "path": "gaia.hardening.passwordPolicy.failedLockEnforcedOnAdmin",
+            "operator": "equals",
+            "value": true
+          },
+          {
+            "path": "gaia.hardening.passwordPolicy.failedAttemptsAllowed",
+            "operator": "lessThanOrEqual",
+            "value": 5
+          },
+          {
+            "path": "gaia.hardening.passwordPolicy.failedLockDurationSeconds",
+            "operator": "greaterThanOrEqual",
+            "value": 7200
+          }
+        ]
+      },
+      "onMissing": "MANUAL",
+      "remediation": { "action": "gaia.planPasswordPolicyHardening" }
+    },
+    {
+      "id": "CP-HARD-007",
+      "title": "Gaia MFA is required where supported",
+      "severity": "critical",
+      "expected": "All users require two-factor authentication on R82 or later",
+      "assertion": {
+        "path": "gaia.hardening.passwordPolicy.allUsersRequireTwoFactorAuthentication",
+        "operator": "equals",
+        "value": true
+      },
+      "onMissing": "MANUAL",
+      "remediation": { "action": "gaia.planMfaRequirement" }
+    },
+    {
+      "id": "CP-HARD-008",
+      "title": "Gaia administrative clients are restricted",
+      "severity": "critical",
+      "expected": "Any-host access is disabled and at least one explicit host or network is configured",
+      "assertion": {
+        "all": [
+          {
+            "path": "gaia.hardening.allowedClients.anyHost",
+            "operator": "equals",
+            "value": false
+          },
+          {
+            "path": "gaia.hardening.allowedClients.configured",
+            "operator": "minItems",
+            "value": 1
+          }
+        ]
+      },
+      "onMissing": "MANUAL",
+      "remediation": { "action": "gaia.planAllowedClients" }
+    },
+    {
+      "id": "CP-HARD-009",
+      "title": "SNMP is disabled or strongly protected",
+      "severity": "high",
+      "expected": "SNMP disabled, or v3-only with read-only SHA512/AES256 users",
+      "assertion": {
+        "any": [
+          {
+            "path": "gaia.hardening.snmp.enabled",
+            "operator": "equals",
+            "value": false
+          },
+          {
+            "all": [
+              {
+                "path": "gaia.hardening.snmp.version",
+                "operator": "equals",
+                "value": "v3-only",
+                "caseInsensitive": true
+              },
+              {
+                "path": "gaia.hardening.snmp.users",
+                "operator": "minItems",
+                "value": 1
+              },
+              {
+                "path": "gaia.hardening.snmp.users",
+                "operator": "allMatch",
+                "evidencePath": "name",
+                "where": {
+                  "all": [
+                    {
+                      "path": "permission",
+                      "operator": "equals",
+                      "value": "read-only",
+                      "caseInsensitive": true
+                    },
+                    {
+                      "path": "authenticationProtocol",
+                      "operator": "equals",
+                      "value": "SHA512",
+                      "caseInsensitive": true
+                    },
+                    {
+                      "path": "privacyProtocol",
+                      "operator": "equals",
+                      "value": "AES256",
+                      "caseInsensitive": true
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "onMissing": "MANUAL",
+      "remediation": { "action": "gaia.planSnmpHardening" }
+    },
+    {
+      "id": "CP-HARD-010",
+      "title": "Gateway system logs are sent to Management",
+      "severity": "high",
+      "expected": "Gaia send-to-management syslog setting is enabled",
+      "assertion": {
+        "path": "gaia.hardening.syslog.sendToManagement",
+        "operator": "equals",
+        "value": true
+      },
+      "onMissing": "MANUAL",
+      "remediation": { "action": "gaia.planSyslogToManagement" }
+    },
+    {
+      "id": "CP-HARD-011",
+      "title": "A Stealth drop-and-log rule exists",
+      "severity": "critical",
+      "expected": "An active rule drops and logs traffic to the configured gateway object",
+      "manualWhen": {
+        "path": "parameters.gatewayObjectName",
+        "operator": "notExists"
+      },
+      "assertion": {
+        "path": "firewall.activeRules",
+        "operator": "anyMatch",
+        "evidencePath": "label",
+        "where": {
+          "all": [
+            {
+              "path": "destination",
+              "operator": "contains",
+              "valuePath": "parameters.gatewayObjectName",
+              "caseInsensitive": true
+            },
+            {
+              "path": "action",
+              "operator": "equals",
+              "value": "Drop",
+              "caseInsensitive": true
+            },
+            {
+              "path": "track",
+              "operator": "equals",
+              "value": "Log",
+              "caseInsensitive": true
+            }
+          ]
+        }
+      },
+      "onMissing": "MANUAL",
+      "remediation": { "action": "management.reviewStealthRule" }
+    },
+    {
+      "id": "CP-HARD-012",
+      "title": "Implied rules and logging are reviewed",
+      "severity": "high",
+      "expected": "Only required implied rules remain enabled and logging is enabled",
+      "assertion": {
+        "path": "parameters.impliedRulesReviewed",
+        "operator": "equals",
+        "value": true
+      },
+      "onMissing": "MANUAL",
+      "remediation": { "action": "manual.reviewImpliedRules" }
+    },
+    {
+      "id": "CP-HARD-013",
+      "title": "Dynamic routing is restricted and authenticated",
+      "severity": "high",
+      "expected": "Required protocols, approved peers, authentication, and inbound filters are reviewed",
+      "assertion": {
+        "path": "parameters.dynamicRoutingReviewed",
+        "operator": "equals",
+        "value": true
+      },
+      "onMissing": "MANUAL",
+      "remediation": { "action": "manual.reviewDynamicRouting" }
+    },
+    {
+      "id": "CP-HARD-014",
+      "title": "Expert mode access is governed",
+      "severity": "critical",
+      "expected": "Expert access is limited to approved administrators and monitored",
+      "assertion": {
+        "path": "parameters.expertModeGovernanceConfirmed",
+        "operator": "equals",
+        "value": true
+      },
+      "onMissing": "MANUAL",
+      "remediation": { "action": "manual.reviewExpertModeGovernance" }
+    },
+    {
+      "id": "CP-HARD-015",
+      "title": "LOM access is isolated",
+      "severity": "critical",
+      "expected": "LOM is not Internet-exposed and is restricted to an authorized management network",
+      "assertion": {
+        "path": "parameters.lomIsolationConfirmed",
+        "operator": "equals",
+        "value": true
+      },
+      "onMissing": "MANUAL",
+      "remediation": { "action": "manual.reviewLomIsolation" }
+    }
+  ]
+}

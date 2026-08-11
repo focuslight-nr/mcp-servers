@@ -5,6 +5,7 @@ export interface TargetFixtures {
   dns?: unknown;
   dhcp?: unknown;
   dateTime?: unknown;
+  hardening?: unknown;
   rulebase?: unknown;
 }
 
@@ -27,6 +28,13 @@ export async function loadTargetFixtures(
     ...(inputs.has("gaia.dateTime")
       ? {
           dateTime: await readJson(join(directory, `${target}.date-time.json`)),
+        }
+      : {}),
+    ...(inputs.has("gaia.hardening")
+      ? {
+          hardening: await readJson(
+            join(directory, `${target}.hardening.json`),
+          ),
         }
       : {}),
     ...(inputs.has("management.accessRulebase")

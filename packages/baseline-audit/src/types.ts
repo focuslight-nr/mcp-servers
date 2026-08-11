@@ -18,6 +18,8 @@ export interface ValueAssertion {
     | "equals"
     | "notEquals"
     | "contains"
+    | "greaterThanOrEqual"
+    | "lessThanOrEqual"
     | "minItems"
     | "maxItems"
     | "truthy";
@@ -105,6 +107,69 @@ export interface GaiaObservations {
   ntpServers?: string[];
   timezone?: string;
   expectedTimezone?: string;
+  hardening?: GaiaHardeningObservations;
+}
+
+export interface GaiaHardeningUser {
+  name?: string;
+  shell?: string;
+  roles?: string[];
+  locked?: boolean;
+  requiresTwoFactorAuthentication?: boolean;
+}
+
+export interface GaiaSnmpUser {
+  name?: string;
+  permission?: string;
+  authenticationProtocol?: string;
+  privacyProtocol?: string;
+  dataPrivacy?: boolean;
+}
+
+export interface GaiaHardeningObservations {
+  productVersion?: string;
+  osBuild?: string;
+  osKernelVersion?: string;
+  users?: GaiaHardeningUser[];
+  passwordPolicy?: {
+    minimumLength?: number;
+    complexity?: number;
+    palindromeCheckEnabled?: boolean;
+    historyCheckEnabled?: boolean;
+    passwordExpirationDays?: number | string;
+    expirationLockoutDays?: number | string;
+    lockUnusedAccountsEnabled?: boolean;
+    inactivityThresholdDays?: number;
+    failedLockEnabled?: boolean;
+    failedLockEnforcedOnAdmin?: boolean;
+    failedAttemptsAllowed?: number;
+    failedLockDurationSeconds?: number;
+    allUsersRequireTwoFactorAuthentication?: boolean;
+  };
+  allowedClients?: {
+    anyHost?: boolean;
+    hosts?: string[];
+    networks?: string[];
+    configured?: string[];
+  };
+  snmp?: {
+    enabled?: boolean;
+    version?: string;
+    interfaces?: string[];
+    users?: GaiaSnmpUser[];
+  };
+  syslog?: {
+    sendToManagement?: boolean;
+    remoteServers?: Array<{
+      server?: string;
+      protocol?: string;
+      port?: number;
+    }>;
+  };
+  bgp?: {
+    configured?: boolean;
+    autonomousSystem?: string | number;
+  };
 }
 
 export interface AccessRule {

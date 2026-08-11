@@ -1,9 +1,16 @@
-import type { AccessRule, GaiaObservations } from "./types.js";
+import type {
+  AccessRule,
+  GaiaHardeningObservations,
+  GaiaHardeningUser,
+  GaiaObservations,
+  GaiaSnmpUser,
+} from "./types.js";
 
 export interface RawGaiaResponses {
   dns?: unknown;
   dhcp?: unknown;
   dateTime?: unknown;
+  hardening?: unknown;
   expectedTimezone?: string;
 }
 
@@ -173,6 +180,220 @@ function parseBoolean(value: unknown): boolean | undefined {
   return undefined;
 }
 
+function directValue(root: unknown, alias: string): unknown {
+  if (!isRecord(root)) return undefined;
+  const wanted = normalizeKey(alias);
+  return Object.entries(root).find(
+    ([key]) => normalizeKey(key) === wanted,
+  )?.[1];
+}
+
+function numberValue(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value !== "string" || !value.trim()) return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function stringValue(value: unknown): string | undefined {
+  if (typeof value === "string" && value.trim()) return value.trim();
+  if (typeof value === "number") return String(value);
+  return undefined;
+}
+
+function objectList(root: unknown, alias = "objects"): unknown[] | undefined {
+  const value = directValue(root, alias);
+  return Array.isArray(value) ? value : undefined;
+}
+
+function hardeningSection(
+  root: unknown,
+  name: string,
+  warnings: string[],
+): unknown {
+  const section = directValue(root, name);
+  if (!isRecord(section)) return undefined;
+  if (section.ok === false) {
+    warnings.push(
+      `Gaia hardening read ${name} failed: ${stringValue(section.error) ?? "unknown error"}`,
+    );
+    return undefined;
+  }
+  return section.ok === true ? section.value : section;
+}
+
+function mapHardeningUser(value: unknown): GaiaHardeningUser | undefined {
+  if (!isRecord(value)) return undefined;
+  const name = stringValue(directValue(value, "name"));
+  if (!name) return undefined;
+  const roles = directValue(value, "roles");
+  return {
+    name,
+    shell: stringValue(directValue(value, "shell")),
+    roles: Array.isArray(roles) ? roles.flatMap(valueStrings) : undefined,
+    locked: parseBoolean(directValue(value, "locked")),
+    requiresTwoFactorAuthentication: parseBoolean(
+      directValue(value, "requires-two-factor-authentication"),
+    ),
+  };
+}
+
+function mapSnmpUser(value: unknown): GaiaSnmpUser | undefined {
+  if (!isRecord(value)) return undefined;
+  const name = stringValue(directValue(value, "name"));
+  if (!name) return undefined;
+  return {
+    name,
+    permission: stringValue(directValue(value, "permission")),
+    authenticationProtocol: stringValue(
+      findFirstValue(directValue(value, "authentication"), ["protocol"]),
+    ),
+    privacyProtocol: stringValue(
+      findFirstValue(directValue(value, "privacy"), ["protocol"]),
+    ),
+    dataPrivacy: parseBoolean(directValue(value, "data-privacy")),
+  };
+}
+
+function adaptHardeningResponses(
+  raw: unknown,
+  warnings: string[],
+): GaiaHardeningObservations | undefined {
+  if (raw === undefined) return undefined;
+  const root = unwrapMcpResponse(raw);
+  const version = hardeningSection(root, "version", warnings);
+  const users = hardeningSection(root, "users", warnings);
+  hardeningSection(root, "roles", warnings);
+  const password = hardeningSection(root, "password_policy", warnings);
+  const allowed = hardeningSection(root, "allowed_clients", warnings);
+  const snmp = hardeningSection(root, "snmp", warnings);
+  const snmpUsers = hardeningSection(root, "snmp_users", warnings);
+  const syslog = hardeningSection(root, "syslog", warnings);
+  const remoteSyslogs = hardeningSection(root, "remote_syslogs", warnings);
+  const bgp = hardeningSection(root, "bgp", warnings);
+
+  const lockSettings = directValue(password, "lock-settings");
+  const inactivity = directValue(lockSettings, "inactivity-settings");
+  const failed = directValue(lockSettings, "failed-attempts-settings");
+  const history = directValue(password, "password-history");
+  const strength = directValue(password, "password-strength");
+  const allowedHosts = unique(
+    valueStrings(directValue(allowed, "allowed-hosts")),
+  );
+  const allowedNetworks = unique(
+    valueStrings(directValue(allowed, "allowed-networks")),
+  );
+  const remoteServers = (objectList(remoteSyslogs) ?? [])
+    .filter(isRecord)
+    .map((item) => ({
+      server: stringValue(directValue(item, "server-ip")),
+      protocol: stringValue(directValue(item, "protocol")),
+      port: numberValue(directValue(item, "port")),
+    }));
+  const autonomousSystem =
+    stringValue(directValue(bgp, "as")) ?? numberValue(directValue(bgp, "as"));
+
+  return {
+    productVersion: stringValue(directValue(version, "product-version")),
+    osBuild: stringValue(directValue(version, "os-build")),
+    osKernelVersion: stringValue(directValue(version, "os-kernel-version")),
+    users: objectList(users)?.map(mapHardeningUser).filter(Boolean) as
+      | GaiaHardeningUser[]
+      | undefined,
+    passwordPolicy:
+      password === undefined
+        ? undefined
+        : {
+            minimumLength: numberValue(directValue(strength, "minimum-length")),
+            complexity: numberValue(directValue(strength, "complexity")),
+            palindromeCheckEnabled: parseBoolean(
+              directValue(strength, "palindrome-check-enabled"),
+            ),
+            historyCheckEnabled: parseBoolean(
+              directValue(history, "check-history-enabled"),
+            ),
+            passwordExpirationDays:
+              numberValue(
+                directValue(lockSettings, "password-expiration-days"),
+              ) ??
+              stringValue(
+                directValue(lockSettings, "password-expiration-days"),
+              ),
+            expirationLockoutDays:
+              numberValue(
+                directValue(
+                  lockSettings,
+                  "password-expiration-maximum-days-before-lock",
+                ),
+              ) ??
+              stringValue(
+                directValue(
+                  lockSettings,
+                  "password-expiration-maximum-days-before-lock",
+                ),
+              ),
+            lockUnusedAccountsEnabled: parseBoolean(
+              directValue(inactivity, "lock-unused-accounts-enabled"),
+            ),
+            inactivityThresholdDays: numberValue(
+              directValue(inactivity, "inactivity-threshold-days"),
+            ),
+            failedLockEnabled: parseBoolean(
+              directValue(failed, "failed-lock-enabled"),
+            ),
+            failedLockEnforcedOnAdmin: parseBoolean(
+              directValue(failed, "failed-lock-enforced-on-admin"),
+            ),
+            failedAttemptsAllowed: numberValue(
+              directValue(failed, "failed-attempts-allowed"),
+            ),
+            failedLockDurationSeconds: numberValue(
+              directValue(failed, "failed-lock-duration-seconds"),
+            ),
+            allUsersRequireTwoFactorAuthentication: parseBoolean(
+              directValue(
+                password,
+                "all-users-require-two-factor-authentication",
+              ),
+            ),
+          },
+    allowedClients:
+      allowed === undefined
+        ? undefined
+        : {
+            anyHost: parseBoolean(directValue(allowed, "allowed-any-host")),
+            hosts: allowedHosts,
+            networks: allowedNetworks,
+            configured: unique([...allowedHosts, ...allowedNetworks]),
+          },
+    snmp:
+      snmp === undefined
+        ? undefined
+        : {
+            enabled: parseBoolean(directValue(snmp, "enabled")),
+            version: stringValue(directValue(snmp, "version")),
+            interfaces: unique(valueStrings(directValue(snmp, "interfaces"))),
+            users: (objectList(snmpUsers) ?? [])
+              .map(mapSnmpUser)
+              .filter(Boolean) as GaiaSnmpUser[],
+          },
+    syslog:
+      syslog === undefined && remoteSyslogs === undefined
+        ? undefined
+        : {
+            sendToManagement: parseBoolean(directValue(syslog, "send-to-mgmt")),
+            remoteServers,
+          },
+    bgp:
+      bgp === undefined
+        ? undefined
+        : {
+            configured: autonomousSystem !== undefined,
+            autonomousSystem,
+          },
+  };
+}
+
 export function adaptGaiaResponses(
   raw: RawGaiaResponses,
 ): AdapterResult<GaiaObservations> {
@@ -180,6 +401,7 @@ export function adaptGaiaResponses(
   const dns = unwrapMcpResponse(raw.dns);
   const dhcp = unwrapMcpResponse(raw.dhcp);
   const dateTime = unwrapMcpResponse(raw.dateTime);
+  const hardening = adaptHardeningResponses(raw.hardening, warnings);
 
   const dnsValues = collectValues(dns, [
     "dns-servers",
@@ -277,6 +499,7 @@ export function adaptGaiaResponses(
       ntpServers,
       timezone,
       expectedTimezone: raw.expectedTimezone,
+      hardening,
     },
     warnings,
   };

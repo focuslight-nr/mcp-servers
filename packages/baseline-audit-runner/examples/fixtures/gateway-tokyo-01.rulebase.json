@@ -1,7 +1,7 @@
 {
   "from": 1,
-  "to": 2,
-  "total": 2,
+  "to": 3,
+  "total": 3,
   "rulebase": [
     {
       "type": "access-rule",
@@ -17,6 +17,17 @@
     {
       "type": "access-rule",
       "rule-number": 2,
+      "name": "Gateway Stealth",
+      "source": [{ "name": "Any" }],
+      "destination": [{ "name": "Tokyo-Gateway" }],
+      "service": [{ "name": "Any" }],
+      "action": { "name": "Drop" },
+      "track": { "name": "Log" },
+      "enabled": true
+    },
+    {
+      "type": "access-rule",
+      "rule-number": 3,
       "name": "Cleanup",
       "source": [{ "name": "Any" }],
       "destination": [{ "name": "Any" }],

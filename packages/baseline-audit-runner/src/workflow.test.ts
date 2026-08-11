@@ -358,6 +358,52 @@ test("loads an organization baseline and calls the generic audit tool", async ()
   }
 });
 
+test("collects the fixed Gaia hardening snapshot when requested", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "baseline-runner-hardening-"));
+  try {
+    await writeFile(
+      join(directory, "baseline.json"),
+      JSON.stringify({
+        formatVersion: "1.0",
+        baseline: { id: "hardening", version: "1", title: "Hardening" },
+        inputs: ["gaia.hardening"],
+        controls: [
+          {
+            id: "HARD-1",
+            title: "Version observed",
+            expected: "Version exists",
+            assertion: {
+              path: "gaia.hardening.productVersion",
+              operator: "exists",
+            },
+          },
+        ],
+      }),
+    );
+    const calls: Array<{
+      role: string;
+      name: string;
+      args: Record<string, unknown>;
+    }> = [];
+    const result = await runTarget(config(directory), target, undefined, {
+      createMcpClient: (role) => new RecordingRoleClient(role, calls),
+    });
+
+    assert.equal(result.status, "COMPLIANT");
+    assert.deepEqual(
+      calls.filter((call) => call.role === "gaia").map((call) => call.name),
+      ["show_hardening_state"],
+    );
+    const auditCall = calls.find((call) => call.role === "audit");
+    assert.notEqual(
+      (auditCall?.args.gaia_responses as { hardening?: unknown }).hardening,
+      undefined,
+    );
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
 test("rejects a Runner baseline without an explicit inputs list", async () => {
   const directory = await mkdtemp(join(tmpdir(), "baseline-runner-workflow-"));
   try {

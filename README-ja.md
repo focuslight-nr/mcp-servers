@@ -11,13 +11,13 @@
 
 アップストリームのMCPサーバーは、AIクライアントにCheck Point製品の幅広い機能を公開します。このフォークでは、無人実行を想定した読み取り専用のセキュリティベースライン監査経路を追加しています。
 
-- **Gaia Read-only Collector MCP** は、DNS、DHCP、日時の観測機能だけを公開します。厳格なTLS検証、対象機器の完全一致許可リスト、非対話型の認証情報プロファイルを使用します。
+- **Gaia Read-only Collector MCP** は、DNS、DHCP、日時に加え、バージョン、ユーザー、パスワードポリシー、許可クライアント、SNMP、syslog、BGPの固定されたハードニング観測機能を公開します。厳格なTLS検証、対象機器の完全一致許可リスト、非対話型の認証情報プロファイルを使用します。
 - **Security Baseline Audit MCP** は、Baseline Format v1のJSONを検証し、組織独自コントロールを決定論的に評価します。また、レポート、履歴、変更、承認済み例外を管理します。
 - **Baseline Audit Runner** は、選択したベースラインを読み込み、再試行、対象ロック、同時実行数の制限、スケジューラー向け終了コード、最小限のWebhook通知、Windowsタスクスケジューラーテンプレートを使用して収集と評価を統合します。
 
 現在の実装は意図的に読み取り専用に制限されています。ポリシーのインストール、Managementの変更公開、汎用的なGaia APIまたはCLI実行ツールは提供しません。
 
-第三者のベンチマーク本文や、それをもとにしたコントロール定義は同梱していません。利用者が読み込ませるベースラインの入手、ライセンス順守、評価内容の正確性は利用者の責任です。
+第三者のベンチマーク本文は同梱していません。公開されているCheck Point Gateway and Management Hardening Administration Guideの推奨事項を簡潔に対応付けた、独自作成の監査Profileを含みます。このProfileはCheck Point公式のベースライン、認証、原文書の代替ではありません。取得できない項目は合格とせず、手動確認として扱います。
 
 作成の背景、アーキテクチャ、セキュリティ境界、検証状況、公開時の注意事項については、[実験的な読み取り専用監査拡張](./docs/experimental-baseline-audit-extension.md)を参照してください。
 
@@ -86,7 +86,7 @@ MCPは、セキュリティ管理データをモジュール化され文脈を�
 | [Check Point WAF](./packages/checkpoint-waf/)                        | `@chkp/checkpoint-waf-mcp`                              | Check Point WAFの資産、プラクティス、プロファイル、ゾーン、動作の照会と管理、および適用変更の公開                                           |
 | [CPView History](./packages/cpview-history-mcp/)                     | `@chkp/cpview-history-mcp`                              | ゲートウェイの性能、リソース使用率、ホットスポット、インシデント調査に関するCPView履歴データベースの分析                                    |
 | [Workforce AI](./packages/workforce-ai/)                             | `@chkp/workforce-ai-mcp`                                | AI Access、Chats、Agents、Secure Browsingを対象とするAIおよびブラウズポリシーの照会と管理、展開、ユーザー可視化                             |
-| [Gaia Read-only Collector](./packages/gaia-readonly-collector/)      | `@focuslight-nr/checkpoint-gaia-readonly-collector-mcp` | 厳格な読み取り専用Gaia APIを通じたDNS、DHCP、日時の観測                                                                                     |
+| [Gaia Read-only Collector](./packages/gaia-readonly-collector/)      | `@focuslight-nr/checkpoint-gaia-readonly-collector-mcp` | 厳格な読み取り専用Gaia APIを通じたDNS、DHCP、日時、ハードニング状態の固定観測                                                               |
 | [Security Baseline Audit](./packages/baseline-audit/)                | `@focuslight-nr/checkpoint-baseline-audit-mcp`          | Baseline Format v1を検証し、組織独自コントロールを決定論的に評価して、レポート、履歴、変更、承認済み例外を保持                              |
 | [Baseline Audit Runner](./packages/baseline-audit-runner/)           | `@focuslight-nr/checkpoint-baseline-audit-runner`       | 選択したベースラインについて、再試行、ロック、同時実行数の制限、通知、Windowsタスクスケジューラーテンプレートを使用した無人収集・評価を実行 |
 

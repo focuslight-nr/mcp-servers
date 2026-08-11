@@ -72,4 +72,42 @@ export class GaiaReadOnlyService {
       available_timezones: availableTimezones,
     };
   }
+
+  async showHardeningState(target: GaiaToolTarget): Promise<unknown> {
+    const client = this.client(target);
+    const params = this.commonParams(target);
+    const reads = {
+      version: "show-version",
+      users: "show-users",
+      roles: "show-roles",
+      password_policy: "show-password-policy",
+      allowed_clients: "show-allowed-clients",
+      snmp: "show-snmp",
+      snmp_users: "show-snmp-users",
+      syslog: "show-syslog",
+      remote_syslogs: "show-remote-syslogs",
+      bgp: "show-configuration-bgp",
+    } as const;
+    const result: Record<
+      string,
+      { ok: boolean; value?: unknown; error?: string }
+    > = {};
+    // Sequential reads reuse one authenticated session and avoid login races.
+    for (const [key, endpoint] of Object.entries(reads)) {
+      try {
+        result[key] = { ok: true, value: await client.call(endpoint, params) };
+      } catch (error) {
+        result[key] = { ok: false, error: (error as Error).message };
+      }
+    }
+    if (Object.values(result).every((item) => !item.ok)) {
+      throw new Error(
+        `Every Gaia hardening read failed: ${Object.values(result)
+          .map((item) => item.error)
+          .filter(Boolean)
+          .join("; ")}`,
+      );
+    }
+    return result;
+  }
 }

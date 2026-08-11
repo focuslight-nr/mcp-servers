@@ -151,6 +151,37 @@ test("loads the published organization baseline example", async () => {
   assert.equal(baseline.controls.length, 3);
 });
 
+test("loads the Check Point hardening profile and evaluates numeric thresholds", async () => {
+  const path = new URL(
+    "../examples/baselines/checkpoint-gaia-gateway-hardening-2026.json",
+    import.meta.url,
+  );
+  const baseline = parseBaseline(
+    JSON.parse(await readFile(path, "utf8")) as unknown,
+  );
+  const passwordControl = {
+    ...baseline,
+    controls: baseline.controls.filter((item) => item.id === "CP-HARD-004"),
+  };
+  const pass = evaluateBaseline({
+    baseline: passwordControl,
+    observations: {
+      gaia: {
+        hardening: {
+          passwordPolicy: {
+            minimumLength: 14,
+            complexity: 4,
+            palindromeCheckEnabled: true,
+            historyCheckEnabled: true,
+          },
+        },
+      },
+    },
+  });
+  assert.equal(baseline.controls.length, 15);
+  assert.equal(pass.summary.pass, 1);
+});
+
 test("fails closed when a collection item lacks data needed by the predicate", () => {
   const report = evaluateBaseline({
     baseline: organizationBaseline,

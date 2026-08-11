@@ -2,7 +2,7 @@
 
 A deterministic, read-only audit engine for Check Point observations and organization-authored security baselines.
 
-The engine accepts Baseline Format v1 JSON and normalized observation JSON. It does not execute JavaScript, shell commands, templates, or remediation actions from a baseline. No third-party benchmark content is bundled; baseline authors are responsible for the content they load.
+The engine accepts Baseline Format v1 JSON and normalized observation JSON. It does not execute JavaScript, shell commands, templates, or remediation actions from a baseline. No third-party benchmark publication is bundled; baseline authors are responsible for the content they load.
 
 ## Responsibilities
 
@@ -17,7 +17,7 @@ This package never connects to or modifies a Check Point system.
 
 ## Baseline Format v1
 
-The canonical JSON Schema is [baseline-format-v1.schema.json](./schemas/baseline-format-v1.schema.json). An original organization baseline is available at [organization-gaia.json](./examples/baselines/organization-gaia.json).
+The canonical JSON Schema is [baseline-format-v1.schema.json](./schemas/baseline-format-v1.schema.json). Examples include an [organization baseline](./examples/baselines/organization-gaia.json) and an independently authored [Check Point Gaia Gateway Hardening 2026 profile](./examples/baselines/checkpoint-gaia-gateway-hardening-2026.json).
 
 ```json
 {
@@ -50,7 +50,7 @@ The canonical JSON Schema is [baseline-format-v1.schema.json](./schemas/baseline
 
 Baseline and control objects reject unknown fields. Control IDs must be unique. Paths are restricted to dot-separated property names and cannot invoke code.
 
-`inputs` declares the observations required by the baseline. The Runner currently recognizes `gaia.dns`, `gaia.dhcp`, `gaia.dateTime`, and `management.accessRulebase`, and starts only the required collectors. A baseline passed directly to `audit_baseline` may use any observation paths because collection happens outside the engine.
+`inputs` declares the observations required by the baseline. The Runner currently recognizes `gaia.dns`, `gaia.dhcp`, `gaia.dateTime`, `gaia.hardening`, and `management.accessRulebase`, and starts only the required collectors. A baseline passed directly to `audit_baseline` may use any observation paths because collection happens outside the engine.
 
 ### Assertions
 
@@ -59,6 +59,7 @@ Value assertions support:
 - `exists` and `notExists`
 - `equals` and `notEquals`
 - `contains`
+- `greaterThanOrEqual` and `lessThanOrEqual` for numeric thresholds
 - `minItems` and `maxItems`
 - `truthy`
 - `valuePath` for organization or target parameters
@@ -115,7 +116,13 @@ Controls may use:
 - `list_audit_exceptions`
 - `delete_audit_exception`
 
-`audit_baseline_raw_responses` currently normalizes Gaia `show_dns`, `show_dhcp`, and `show_date_time` responses plus Management `show_access_rulebase` responses. Use `audit_baseline` for other normalized observation documents.
+`audit_baseline_raw_responses` currently normalizes Gaia `show_dns`, `show_dhcp`, `show_date_time`, and the fixed `show_hardening_state` response plus Management `show_access_rulebase` responses. Use `audit_baseline` for other normalized observation documents.
+
+## Check Point Hardening Profile
+
+The included 2026 profile is an independent, concise mapping of selected recommendations from the public [Check Point Gateway and Management Hardening Administration Guide](https://sc1.checkpoint.com/documents/Check_Point_Gateway_and_Management_Hardening/CP_Check_Point_Gateway_and_Management_Hardening.pdf). It is not an official Check Point baseline, certification, or replacement for the source guide. See the [profile mapping and limitations](./examples/baselines/README-hardening-profile.md).
+
+Password policy, restricted shells, MFA, allowed clients, SNMP, gateway syslog, and a structural Stealth Rule check can be evaluated automatically when observations are available. Recommended JHF status, implied rules, dynamic-routing design, Expert-mode governance, and LOM isolation remain `MANUAL` unless a trusted external process supplies the corresponding target parameters. The profile intentionally reports missing or unsupported API data as `MANUAL`; it never assumes compliance.
 
 ## Local Storage
 

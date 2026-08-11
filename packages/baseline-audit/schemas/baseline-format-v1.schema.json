@@ -69,6 +69,8 @@
             "equals",
             "notEquals",
             "contains",
+            "greaterThanOrEqual",
+            "lessThanOrEqual",
             "minItems",
             "maxItems",
             "truthy"
