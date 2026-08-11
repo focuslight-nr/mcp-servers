@@ -33,6 +33,7 @@ interface RawAuditToolArgs extends AuditToolArgs {
     dns?: unknown;
     dhcp?: unknown;
     date_time?: unknown;
+    hardening?: unknown;
   };
   management_responses?: {
     access_rulebase_pages?: unknown[];
@@ -257,6 +258,7 @@ registerTool(
         dns: z.unknown().optional(),
         dhcp: z.unknown().optional(),
         date_time: z.unknown().optional(),
+        hardening: z.unknown().optional(),
       })
       .optional(),
     management_responses: z
@@ -272,6 +274,7 @@ registerTool(
         dns: args.gaia_responses?.dns,
         dhcp: args.gaia_responses?.dhcp,
         dateTime: args.gaia_responses?.date_time,
+        hardening: args.gaia_responses?.hardening,
         expectedTimezone: args.expected_timezone,
       });
       const rulebase = adaptAccessRulebasePages(

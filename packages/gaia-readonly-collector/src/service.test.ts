@@ -69,3 +69,38 @@ test("exposes only the required read operations and reuses a target session", as
     available_timezones: { endpoint: "show-timezones" },
   });
 });
+
+test("collects the fixed hardening reads and preserves partial API support", async () => {
+  const credentials = new FakeCredentialProvider();
+  const client = new FakeClient();
+  client.call = async (endpoint, data = {}) => {
+    client.calls.push({ endpoint, data });
+    if (endpoint === "show-roles") throw new Error("not supported");
+    return { endpoint };
+  };
+  const service = new GaiaReadOnlyService(credentials, () => client);
+
+  const result = (await service.showHardeningState({
+    gatewayIp: "192.0.2.10",
+    port: 443,
+  })) as Record<string, { ok: boolean; value?: unknown; error?: string }>;
+
+  assert.equal(result.version.ok, true);
+  assert.equal(result.roles.ok, false);
+  assert.match(result.roles.error ?? "", /not supported/);
+  assert.deepEqual(
+    client.calls.map((item) => item.endpoint),
+    [
+      "show-version",
+      "show-users",
+      "show-roles",
+      "show-password-policy",
+      "show-allowed-clients",
+      "show-snmp",
+      "show-snmp-users",
+      "show-syslog",
+      "show-remote-syslogs",
+      "show-configuration-bgp",
+    ],
+  );
+});

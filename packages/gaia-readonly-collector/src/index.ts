@@ -107,6 +107,14 @@ registerTool(
   async (args: ToolArgs) => execute(() => service.showDateTime(target(args))),
 );
 
+registerTool(
+  "show_hardening_state",
+  "Read the fixed set of Gaia version, user, role, password policy, allowed client, SNMP, syslog, and BGP settings used by baseline audits. Unsupported reads are reported per section; no configuration can be changed.",
+  commonSchema,
+  async (args: ToolArgs) =>
+    execute(() => service.showHardeningState(target(args))),
+);
+
 export { EnvironmentCredentialProvider, GaiaReadOnlyService, server };
 export type { GaiaCredentialProvider, GaiaCredentials } from "./credentials.js";
 

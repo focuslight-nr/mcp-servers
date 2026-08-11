@@ -1,0 +1,99 @@
+{
+  "version": {
+    "ok": true,
+    "value": {
+      "product-version": "R82",
+      "os-build": "123",
+      "os-kernel-version": "4.18.0-example"
+    }
+  },
+  "users": {
+    "ok": true,
+    "value": {
+      "objects": [
+        {
+          "name": "admin",
+          "shell": "cli",
+          "roles": ["adminRole"],
+          "locked": false,
+          "requires-two-factor-authentication": true
+        }
+      ]
+    }
+  },
+  "roles": {
+    "ok": true,
+    "value": { "roles": [] }
+  },
+  "password_policy": {
+    "ok": true,
+    "value": {
+      "password-strength": {
+        "minimum-length": 10,
+        "complexity": 4,
+        "palindrome-check-enabled": true
+      },
+      "password-history": {
+        "check-history-enabled": true,
+        "repeated-history-length": 10
+      },
+      "lock-settings": {
+        "password-expiration-days": 90,
+        "password-expiration-maximum-days-before-lock": 1,
+        "inactivity-settings": {
+          "lock-unused-accounts-enabled": true,
+          "inactivity-threshold-days": 30
+        },
+        "failed-attempts-settings": {
+          "failed-lock-enabled": true,
+          "failed-lock-enforced-on-admin": true,
+          "failed-attempts-allowed": 5,
+          "failed-lock-duration-seconds": 7200
+        }
+      },
+      "all-users-require-two-factor-authentication": true
+    }
+  },
+  "allowed_clients": {
+    "ok": true,
+    "value": {
+      "allowed-any-host": false,
+      "allowed-hosts": ["192.0.2.200"],
+      "allowed-networks": ["198.51.100.0/24"]
+    }
+  },
+  "snmp": {
+    "ok": true,
+    "value": {
+      "enabled": true,
+      "version": "v3-only",
+      "interfaces": ["eth1"]
+    }
+  },
+  "snmp_users": {
+    "ok": true,
+    "value": {
+      "objects": [
+        {
+          "name": "monitor",
+          "permission": "read-only",
+          "authentication": { "protocol": "SHA512" },
+          "privacy": { "protocol": "AES256" },
+          "data-privacy": true
+        }
+      ]
+    }
+  },
+  "syslog": {
+    "ok": true,
+    "value": { "send-to-mgmt": true }
+  },
+  "remote_syslogs": {
+    "ok": true,
+    "value": { "objects": [] }
+  },
+  "bgp": {
+    "ok": true,
+    "value": { "as": 64512 }
+  }
+}

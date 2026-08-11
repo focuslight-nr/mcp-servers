@@ -9,6 +9,16 @@ const ALLOWED_ENDPOINTS = new Set([
   "show-ntp",
   "show-time-and-date",
   "show-timezones",
+  "show-version",
+  "show-users",
+  "show-roles",
+  "show-password-policy",
+  "show-allowed-clients",
+  "show-snmp",
+  "show-snmp-users",
+  "show-syslog",
+  "show-remote-syslogs",
+  "show-configuration-bgp",
 ]);
 
 export interface GaiaSessionClient {

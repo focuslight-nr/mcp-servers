@@ -30,6 +30,8 @@ const assertionSchema: z.ZodTypeAny = z.lazy(() =>
           "equals",
           "notEquals",
           "contains",
+          "greaterThanOrEqual",
+          "lessThanOrEqual",
           "minItems",
           "maxItems",
           "truthy",
@@ -44,6 +46,8 @@ const assertionSchema: z.ZodTypeAny = z.lazy(() =>
           "equals",
           "notEquals",
           "contains",
+          "greaterThanOrEqual",
+          "lessThanOrEqual",
           "minItems",
           "maxItems",
         ].includes(value.operator);

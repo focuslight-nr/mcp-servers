@@ -22,6 +22,7 @@ test("starts over stdio, exposes only read tools, and fails closed without an al
       "show_date_time",
       "show_dhcp",
       "show_dns",
+      "show_hardening_state",
     ]);
     const result = await client.callTool({
       name: "show_dns",

@@ -98,6 +98,8 @@ function evaluateValue(
         | "equals"
         | "notEquals"
         | "contains"
+        | "greaterThanOrEqual"
+        | "lessThanOrEqual"
         | "minItems"
         | "maxItems"
         | "truthy";
@@ -175,6 +177,18 @@ function evaluateValue(
       }
       break;
     }
+    case "greaterThanOrEqual":
+      pass =
+        typeof actual.value === "number" &&
+        typeof expectedResult.value === "number" &&
+        actual.value >= expectedResult.value;
+      break;
+    case "lessThanOrEqual":
+      pass =
+        typeof actual.value === "number" &&
+        typeof expectedResult.value === "number" &&
+        actual.value <= expectedResult.value;
+      break;
     case "minItems":
       pass =
         (Array.isArray(actual.value) || typeof actual.value === "string") &&

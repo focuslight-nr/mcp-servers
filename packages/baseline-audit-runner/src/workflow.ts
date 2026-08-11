@@ -134,6 +134,7 @@ const supportedInputs = [
   "gaia.dns",
   "gaia.dhcp",
   "gaia.dateTime",
+  "gaia.hardening",
   "management.accessRulebase",
 ] as const;
 
@@ -177,6 +178,7 @@ async function collectLive(
   dns?: unknown;
   dhcp?: unknown;
   dateTime?: unknown;
+  hardening?: unknown;
   rulebase?: unknown;
 }> {
   const needsGaia = [...inputs].some((input) => input.startsWith("gaia."));
@@ -209,6 +211,7 @@ async function collectLive(
       dns?: unknown;
       dhcp?: unknown;
       dateTime?: unknown;
+      hardening?: unknown;
       rulebase?: unknown;
     } = {};
     if (inputs.has("gaia.dns") && gaia) {
@@ -234,6 +237,14 @@ async function collectLive(
         config.toolTimeoutMs,
       );
       assertToolSucceeded(collected.dateTime, "show_date_time");
+    }
+    if (inputs.has("gaia.hardening") && gaia) {
+      collected.hardening = await gaia.callTool(
+        "show_hardening_state",
+        gatewayArgs,
+        config.toolTimeoutMs,
+      );
+      assertToolSucceeded(collected.hardening, "show_hardening_state");
     }
     if (inputs.has("management.accessRulebase") && management) {
       if (!target.accessLayer) {
@@ -286,6 +297,7 @@ async function executeAttempt(
           dns: collected.dns,
           dhcp: collected.dhcp,
           date_time: collected.dateTime,
+          hardening: collected.hardening,
         },
         management_responses:
           collected.rulebase === undefined

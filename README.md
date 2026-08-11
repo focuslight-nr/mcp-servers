@@ -6,11 +6,11 @@ This repository contains a collection of Model Context Protocol (MCP) servers fo
 
 This fork adds a deliberately narrow path for unattended security baseline auditing:
 
-- **Gaia Read-only Collector MCP** exposes only DNS, DHCP, and date/time observations with strict TLS validation and an exact target allowlist.
+- **Gaia Read-only Collector MCP** exposes fixed DNS, DHCP, date/time, and hardening-state observations with strict TLS validation and an exact target allowlist.
 - **Security Baseline Audit MCP** validates Baseline Format v1 and evaluates organization-authored controls deterministically.
 - **Baseline Audit Runner** collects only inputs declared by a baseline, persists reports and history, and supports scheduled operation.
 
-No third-party benchmark content is bundled. The extension is read-only: remediation identifiers are metadata and are never executed. See [Experimental Read-only Audit Extension](./docs/experimental-baseline-audit-extension.md) for architecture, security boundaries, and validation status.
+No third-party benchmark publication is bundled. An independently authored profile maps selected public Check Point hardening recommendations to automatic and manual checks. The extension is read-only: remediation identifiers are metadata and are never executed. See [Experimental Read-only Audit Extension](./docs/experimental-baseline-audit-extension.md) for architecture, security boundaries, and validation status.
 
 ## What is MCP?
 
@@ -77,7 +77,7 @@ The following MCP servers are available in this repository:
 | [Check Point WAF](./packages/checkpoint-waf/)                        | `@chkp/checkpoint-waf-mcp`                              | Query and manage Check Point WAF assets, practices, profiles, zones, and behaviors, and publish enforcement changes                                                                                                             |
 | [CPView History](./packages/cpview-history-mcp/)                     | `@chkp/cpview-history-mcp`                              | Analyze CPView history databases (CPViewDB.dat) for gateway performance, resource utilization, hotspot detection, and incident investigation                                                                                    |
 | [Workforce AI](./packages/workforce-ai/)                             | `@chkp/workforce-ai-mcp`                                | Query and manage AI & Browse security policy - AI Access, Chats, Agents, and Secure Browsing - plus deployment and user visibility                                                                                              |
-| [Gaia Read-only Collector](./packages/gaia-readonly-collector/)      | `@focuslight-nr/checkpoint-gaia-readonly-collector-mcp` | Collect DNS, DHCP, and date/time observations through a strict read-only Gaia API surface                                                                                                                                       |
+| [Gaia Read-only Collector](./packages/gaia-readonly-collector/)      | `@focuslight-nr/checkpoint-gaia-readonly-collector-mcp` | Collect fixed DNS, DHCP, date/time, and hardening-state observations through a strict read-only Gaia API surface                                                                                                                 |
 | [Security Baseline Audit](./packages/baseline-audit/)                | `@focuslight-nr/checkpoint-baseline-audit-mcp`          | Validate and deterministically evaluate organization-authored Baseline Format v1 documents                                                                                                                                      |
 | [Baseline Audit Runner](./packages/baseline-audit-runner/)           | `@focuslight-nr/checkpoint-baseline-audit-runner`       | Run scheduled collection and evaluation for an explicitly selected baseline                                                                                                                                                     |
 
