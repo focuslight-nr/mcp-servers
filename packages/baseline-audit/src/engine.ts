@@ -318,6 +318,7 @@ export function evaluateBaseline(input: EvaluateBaselineInput): AuditReport {
         return {
           controlId: control.id,
           title: control.title,
+          severity: control.severity ?? "medium",
           status: "ERROR",
           expected: control.expected,
           observed: forcedError.observed,
@@ -336,6 +337,7 @@ export function evaluateBaseline(input: EvaluateBaselineInput): AuditReport {
         return {
           controlId: control.id,
           title: control.title,
+          severity: control.severity ?? "medium",
           status: "MANUAL",
           expected: control.expected,
           observed: manual.observed,
@@ -358,6 +360,7 @@ export function evaluateBaseline(input: EvaluateBaselineInput): AuditReport {
     return {
       controlId: control.id,
       title: control.title,
+      severity: control.severity ?? "medium",
       status,
       expected: control.expected,
       observed:

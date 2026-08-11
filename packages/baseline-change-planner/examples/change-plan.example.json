@@ -1,0 +1,72 @@
+{
+  "$schema": "https://github.com/focuslight-nr/mcp-servers/blob/main/packages/baseline-change-planner/schemas/change-plan-format-v1.schema.json",
+  "formatVersion": "1.0",
+  "plan": {
+    "id": "plan-36514fde038f420af509",
+    "generatedAt": "2026-08-11T07:00:00.000Z",
+    "status": "PROPOSED",
+    "title": "Baseline remediation proposal for gateway-lab-01"
+  },
+  "source": {
+    "auditId": "audit-example-001",
+    "auditReportSha256": "e4f309d21fb3b41b3ca6a372f829d2363792ac71dd60425c101cb0c7b02b47a2",
+    "baselineId": "organization-gaia",
+    "baselineVersion": "2026.1",
+    "target": "gateway-lab-01",
+    "reportReadOnly": true
+  },
+  "safety": {
+    "executionAllowed": false,
+    "humanApprovalRequired": true,
+    "minimumApprovals": 1,
+    "dryRunRequired": true,
+    "backupRequired": true,
+    "postChangeAuditRequired": true,
+    "rollbackRequired": true,
+    "maxTargets": 1
+  },
+  "changes": [
+    {
+      "id": "change-ORG-GAIA-001",
+      "controlId": "ORG-GAIA-001",
+      "title": "Two DNS servers are configured",
+      "target": "gateway-lab-01",
+      "rationale": "The latest bound audit result is FAIL. Expected: At least two DNS servers",
+      "evidence": ["192.0.2.53"],
+      "action": {
+        "id": "gaia.setDnsServers",
+        "parameters": {
+          "servers": ["192.0.2.53", "198.51.100.53"]
+        }
+      },
+      "risk": {
+        "level": "medium",
+        "blastRadius": "single-target",
+        "notes": []
+      },
+      "approval": {
+        "status": "PENDING",
+        "requiredApprovals": 1,
+        "approvals": []
+      },
+      "preconditions": [
+        {
+          "kind": "audit-result-unchanged",
+          "controlId": "ORG-GAIA-001",
+          "expectedStatus": "FAIL",
+          "expectedObserved": "One DNS server"
+        }
+      ],
+      "verification": {
+        "kind": "baseline-control",
+        "controlId": "ORG-GAIA-001",
+        "expectedStatus": "PASS"
+      },
+      "rollback": {
+        "required": true,
+        "strategy": "restore-pre-change-backup",
+        "description": "Restore the executor-created pre-change backup, then rerun the bound baseline control."
+      }
+    }
+  ]
+}

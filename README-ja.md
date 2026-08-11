@@ -13,6 +13,7 @@
 
 - **Gaia Read-only Collector MCP** は、DNS、DHCP、日時に加え、バージョン、ユーザー、パスワードポリシー、許可クライアント、SNMP、syslog、BGPの固定されたハードニング観測機能を公開します。厳格なTLS検証、対象機器の完全一致許可リスト、非対話型の認証情報プロファイルを使用します。
 - **Security Baseline Audit MCP** は、Baseline Format v1のJSONを検証し、組織独自コントロールを決定論的に評価します。また、レポート、履歴、変更、承認済み例外を管理します。
+- **Baseline Change Planner MCP** は、明示的なaction許可リストを使用し、対象となる不合格コントロールを改変不能かつ実行不可のChange Plan Format v1提案へ変換します。
 - **Baseline Audit Runner** は、選択したベースラインを読み込み、再試行、対象ロック、同時実行数の制限、スケジューラー向け終了コード、最小限のWebhook通知、Windowsタスクスケジューラーテンプレートを使用して収集と評価を統合します。
 
 現在の実装は意図的に読み取り専用に制限されています。ポリシーのインストール、Managementの変更公開、汎用的なGaia APIまたはCLI実行ツールは提供しません。
@@ -60,6 +61,7 @@ MCPは、セキュリティ管理データをモジュール化され文脈を�
   - **`/workforce-ai`** - AI Access、Chats、Agents、Secure Browsingを対象とするAIおよびブラウズポリシーの管理、展開、ユーザー可視化用Workforce AI MCPサーバー
   - **`/gaia-readonly-collector`** - 厳格なTLS検証と対象機器の完全一致許可リストを備えた、実験的な読み取り専用Gaiaコレクター
   - **`/baseline-audit`** - 組織独自のBaseline Format v1を評価する、コミュニティ開発の汎用監査サーバー
+  - **`/baseline-change-planner`** - 実行不可のChange Plan Format v1提案を生成する、コミュニティ開発の変更Planner
   - **`/baseline-audit-runner`** - ベースラインファイル選択、再試行、対象ロック、通知、スケジューラーテンプレートを備えたコミュニティ開発の無人監査ランナー
 
 ## 利用可能なMCPサーバー
@@ -88,6 +90,7 @@ MCPは、セキュリティ管理データをモジュール化され文脈を�
 | [Workforce AI](./packages/workforce-ai/)                             | `@chkp/workforce-ai-mcp`                                | AI Access、Chats、Agents、Secure Browsingを対象とするAIおよびブラウズポリシーの照会と管理、展開、ユーザー可視化                             |
 | [Gaia Read-only Collector](./packages/gaia-readonly-collector/)      | `@focuslight-nr/checkpoint-gaia-readonly-collector-mcp` | 厳格な読み取り専用Gaia APIを通じたDNS、DHCP、日時、ハードニング状態の固定観測                                                               |
 | [Security Baseline Audit](./packages/baseline-audit/)                | `@focuslight-nr/checkpoint-baseline-audit-mcp`          | Baseline Format v1を検証し、組織独自コントロールを決定論的に評価して、レポート、履歴、変更、承認済み例外を保持                              |
+| [Baseline Change Planner](./packages/baseline-change-planner/)       | `@focuslight-nr/checkpoint-baseline-change-planner-mcp` | 許可された不合格コントロールから、改変不能かつ実行不可のChange Plan Format v1提案を生成                                                     |
 | [Baseline Audit Runner](./packages/baseline-audit-runner/)           | `@focuslight-nr/checkpoint-baseline-audit-runner`       | 選択したベースラインについて、再試行、ロック、同時実行数の制限、通知、Windowsタスクスケジューラーテンプレートを使用した無人収集・評価を実行 |
 
 ## MCPサーバーの設定例

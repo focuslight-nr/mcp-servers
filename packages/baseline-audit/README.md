@@ -11,7 +11,7 @@ The engine accepts Baseline Format v1 JSON and normalized observation JSON. It d
 - Produce JSON and Markdown reports.
 - Store optional local history, changes, and time-limited approved exceptions.
 - Normalize the currently supported Gaia and Management MCP responses.
-- Expose remediation identifiers as metadata for a separate future change planner.
+- Expose remediation identifiers and severity as metadata for the separate Change Planner MCP.
 
 This package never connects to or modifies a Check Point system.
 
@@ -142,7 +142,7 @@ The store may contain configuration evidence and approval metadata. Restrict fil
 - Baseline paths cannot access files, environment variables, or network resources.
 - Remediation declarations are metadata only.
 - Exceptions produce `EXEMPTED`, never `PASS`, and require an approver and expiration. Use `baseline_id` to scope an exception when multiple baselines reuse a control ID.
-- Collection, scheduling, notifications, and future write execution remain separate components.
+- Collection, scheduling, notifications, change planning, and future write execution remain separate components.
 
 ## Development
 

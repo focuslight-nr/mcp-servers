@@ -187,6 +187,7 @@ export interface AccessRule {
 export interface AuditResult {
   controlId: string;
   title: string;
+  severity?: "low" | "medium" | "high" | "critical";
   status: AuditStatus;
   expected: string;
   observed: string;

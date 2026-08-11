@@ -49,6 +49,7 @@
         "nx:build:argos-erm": "npx nx build @chkp/argos-erm-mcp",
         "nx:build:checkpoint-waf": "npx nx build @chkp/checkpoint-waf-mcp",
         "nx:build:baseline-audit": "npx nx build @focuslight-nr/checkpoint-baseline-audit-mcp",
+        "nx:build:baseline-change-planner": "npx nx build @focuslight-nr/checkpoint-baseline-change-planner-mcp",
         "nx:build:baseline-audit-runner": "npx nx build @focuslight-nr/checkpoint-baseline-audit-runner",
         "nx:build:gaia-readonly-collector": "npx nx build @focuslight-nr/checkpoint-gaia-readonly-collector-mcp",
         "nx:build:echo-server": "npx nx build @chkp/echo-server-mcp",

@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/focuslight-nr/mcp-servers/blob/main/packages/baseline-change-planner/schemas/change-plan-format-v1.schema.json",
+  "title": "Check Point Change Plan Format v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["formatVersion", "plan", "source", "safety", "changes"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "formatVersion": { "const": "1.0" },
+    "plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "generatedAt", "status", "title"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "generatedAt": { "type": "string", "format": "date-time" },
+        "status": { "const": "PROPOSED" },
+        "title": { "type": "string", "minLength": 1 }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "auditReportSha256",
+        "baselineId",
+        "baselineVersion",
+        "target",
+        "reportReadOnly"
+      ],
+      "properties": {
+        "auditId": { "type": "string", "minLength": 1 },
+        "auditReportSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "baselineId": { "$ref": "#/$defs/id" },
+        "baselineVersion": { "type": "string", "minLength": 1 },
+        "target": { "type": "string", "minLength": 1 },
+        "reportReadOnly": { "const": true }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionAllowed",
+        "humanApprovalRequired",
+        "minimumApprovals",
+        "dryRunRequired",
+        "backupRequired",
+        "postChangeAuditRequired",
+        "rollbackRequired",
+        "maxTargets"
+      ],
+      "properties": {
+        "executionAllowed": { "const": false },
+        "humanApprovalRequired": { "const": true },
+        "minimumApprovals": { "type": "integer", "minimum": 1 },
+        "dryRunRequired": { "const": true },
+        "backupRequired": { "const": true },
+        "postChangeAuditRequired": { "const": true },
+        "rollbackRequired": { "const": true },
+        "maxTargets": { "const": 1 }
+      }
+    },
+    "changes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/change" }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._-]+$"
+    },
+    "value": {
+      "oneOf": [
+        { "type": ["string", "number", "boolean", "null"] },
+        { "type": "array", "items": { "$ref": "#/$defs/value" } },
+        {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/value" }
+        }
+      ]
+    },
+    "change": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "controlId",
+        "title",
+        "target",
+        "rationale",
+        "evidence",
+        "action",
+        "risk",
+        "approval",
+        "preconditions",
+        "verification",
+        "rollback"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "controlId": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "target": { "type": "string", "minLength": 1 },
+        "rationale": { "type": "string", "minLength": 1 },
+        "evidence": { "type": "array", "items": { "type": "string" } },
+        "action": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "parameters"],
+          "properties": {
+            "id": { "$ref": "#/$defs/id" },
+            "parameters": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/value" }
+            }
+          }
+        },
+        "risk": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["level", "blastRadius", "notes"],
+          "properties": {
+            "level": { "enum": ["low", "medium", "high", "critical"] },
+            "blastRadius": { "const": "single-target" },
+            "notes": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "approval": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "requiredApprovals", "approvals"],
+          "properties": {
+            "status": { "const": "PENDING" },
+            "requiredApprovals": { "type": "integer", "minimum": 1 },
+            "approvals": { "type": "array", "maxItems": 0 }
+          }
+        },
+        "preconditions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "controlId",
+              "expectedStatus",
+              "expectedObserved"
+            ],
+            "properties": {
+              "kind": { "const": "audit-result-unchanged" },
+              "controlId": { "type": "string", "minLength": 1 },
+              "expectedStatus": { "const": "FAIL" },
+              "expectedObserved": { "type": "string" }
+            }
+          }
+        },
+        "verification": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "controlId", "expectedStatus"],
+          "properties": {
+            "kind": { "const": "baseline-control" },
+            "controlId": { "type": "string", "minLength": 1 },
+            "expectedStatus": { "const": "PASS" }
+          }
+        },
+        "rollback": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["required", "strategy", "description"],
+          "properties": {
+            "required": { "const": true },
+            "strategy": { "const": "restore-pre-change-backup" },
+            "description": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}
