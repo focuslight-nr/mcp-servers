@@ -2,13 +2,23 @@
 
 This repository contains a collection of Model Context Protocol (MCP) servers for Check Point security platforms, implemented in TypeScript. Each MCP server is organized as a separate package within this monorepo structure.
 
+> **Unofficial fork:** The read-only baseline audit extension in this fork is community-developed. It is not an official Check Point product and is not endorsed or supported by Check Point Software Technologies Ltd.
+
+This fork adds a deliberately narrow path for unattended security baseline auditing:
+
+- **Gaia Read-only Collector MCP** exposes only DNS, DHCP, and date/time observations with strict TLS validation and an exact target allowlist.
+- **Security Baseline Audit MCP** validates Baseline Format v1 and evaluates organization-authored controls deterministically.
+- **Baseline Audit Runner** collects only inputs declared by a baseline, persists reports and history, and supports scheduled operation.
+
+No third-party benchmark content is bundled. The extension is read-only: remediation identifiers are metadata and are never executed. See [Experimental Read-only Audit Extension](./docs/experimental-baseline-audit-extension.md) for architecture, security boundaries, and validation status.
+
 ## What is MCP?
 
 Model Context Protocol (MCP) servers expose a structured, machine-readable API for your enterprise data—designed for AI-powered automation, copilots, and decision engines. By delivering a clear, contextual slice of your security environment, MCP lets you query, analyze, and optimize complex systems without building custom SDKs or parsing raw exports.
 
 ## Why MCP for Check Point Security?
- 
-Security policies often span hundreds of rules and thousands of objects across diverse enforcement points. Understanding, auditing, or optimizing these environments is slow and error-prone. 
+
+Security policies often span hundreds of rules and thousands of objects across diverse enforcement points. Understanding, auditing, or optimizing these environments is slow and error-prone.
 
 MCP changes this: exposing security management data in a modular, context-rich format, ready for AI systems to consume. Enabling the AI to use your data with precision. Ask real-world questions, and get structured, actionable answers—instantly.
 
@@ -25,7 +35,7 @@ This monorepo is organized with each Check Point security domain as a separate M
   - **`/harmony-infra`** - Shared infrastructure components for Harmony products
   - **`/harmony-sase`** - Harmony SASE MCP Server for SASE policy management
   - **`/mcp-utils`** - Shared utilities for Check Point MCP servers
-  - **`/reputation-service`** - Reputation MCP Server 
+  - **`/reputation-service`** - Reputation MCP Server
   - **`/gw-cli-base`** - Base Infra for running Gateways scripts
   - **`/gw-cli`** - Gateway Script MCP Server for Information, Perfomance and Diagnostics
   - **`/gw-cli-connection-analysis`** - Gateway Script MCP Server to Analyze Connection Issues
@@ -39,32 +49,37 @@ This monorepo is organized with each Check Point security domain as a separate M
   - **`/checkpoint-waf`** - Check Point WAF MCP server for managing web application and APIs firewall assets, policies and configuration
   - **`/cpview-history-mcp`** - CPView History MCP server for analyzing Check Point gateway performance databases
   - **`/workforce-ai`** - Workforce AI MCP server for AI & Browse policy security management for AI Access, Chats, Agents and Secure Browsing, plus deployment and user visibility
+  - **`/gaia-readonly-collector`** - Community-developed Gaia collector with a fixed read-only API surface
+  - **`/baseline-audit`** - Community-developed deterministic Baseline Format v1 audit MCP
+  - **`/baseline-audit-runner`** - Community-developed unattended baseline audit runner
 
 ## Available MCP Servers
 
 The following MCP servers are available in this repository:
 
-| MCP Server | Package Name | Description |
-|------------|--------------|-------------|
-| [Management](./packages/management/) | `@chkp/quantum-management-mcp` | Query policies, rules, objects, and network topology |
-| [Management Logs](./packages/management-logs/) | `@chkp/management-logs-mcp` | Make queries and gain insights from connection and audit logs |
-| [Threat-Prevention](./packages/threat-prevention/) | `@chkp/threat-prevention-mcp` | Query Threat Prevention policies, profiles and indicators, view IPS updates and IOC feeds |
-| [HTTPS-Inspection](./packages/https-inspection/) | `@chkp/https-inspection-mcp` | Query Https Inspection policies, rules and exceptions |
-| [Check Point SASE](./packages/harmony-sase/) | `@chkp/harmony-sase-mcp` | Query and manage Check Point SASE Regions, Networks, Applications and configurations |
-| [Reputation Service](./packages/reputation-service/) | `@chkp/reputation-service-mcp` | Query Url, IP and File Reputation |
-| [GW CLI](./packages/gw-cli/) | `@chkp/quantum-gw-cli-mcp` | Provides comprehensive diagnostics and analysis across hardware, network configuration, high availability, performance, security, and real-time connection debugging |
-| [GW CLI Connection Analysis](./packages/gw-cli-connection-analysis/) | `@chkp/quantum-gw-connection-analysis-mcp` | Provides debug logs to help analyze connection issues |
-| [Threat Emulation](./packages/threat-emulation/) | `@chkp/threat-emulation-mcp` | Analyze files for malware and threats using Check Point's cloud services |
-| [Gaia](./packages/gaia/) | `@chkp/quantum-gaia-mcp` | Network management and interface configuration for GAIA OS |
-| [Documentation Tool](./packages/documentation-tool/) | `@chkp/documentation-mcp` | Comprehensive Check Point documentation assistant providing instant access to product information, technical specifications, configuration guidance, and feature documentation across the entire Check Point security portfolio |
-| [Check Point Spark Firewall](./packages/spark-management/) | `@chkp/spark-management-mcp` | Manage and monitor Check Point Spark Firewall appliances for MSPs and distributed networks. |
-| [CPInfo Analysis](./packages/cpinfo-analysis/) | `@chkp/cpinfo-analysis-mcp` | Analyze CPInfo diagnostic files for system health, performance metrics, network configuration, and troubleshooting insights |
-| [Exposure Management](./packages/argos-erm/) | `@chkp/argos-erm-mcp` | Monitor, investigate and remediate security threats across alerts, IOCs, assets, vulnerabilities, credential exposure, threat intelligence, and organizational risk assessment |
-| [Policy Insights](./packages/policy-insights/) | `@chkp/policy-insights-mcp` | Query policy insights to tighten Access Control policies |
-| [Check Point WAF](./packages/checkpoint-waf/) | `@chkp/checkpoint-waf-mcp` | Query and manage Check Point WAF assets, practices, profiles, zones, and behaviors, and publish enforcement changes |
-| [CPView History](./packages/cpview-history-mcp/) | `@chkp/cpview-history-mcp` | Analyze CPView history databases (CPViewDB.dat) for gateway performance, resource utilization, hotspot detection, and incident investigation |
-| [Workforce AI](./packages/workforce-ai/) | `@chkp/workforce-ai-mcp` | Query and manage AI & Browse security policy - AI Access, Chats, Agents, and Secure Browsing - plus deployment and user visibility |
-
+| MCP Server                                                           | Package Name                                            | Description                                                                                                                                                                                                                     |
+| -------------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Management](./packages/management/)                                 | `@chkp/quantum-management-mcp`                          | Query policies, rules, objects, and network topology                                                                                                                                                                            |
+| [Management Logs](./packages/management-logs/)                       | `@chkp/management-logs-mcp`                             | Make queries and gain insights from connection and audit logs                                                                                                                                                                   |
+| [Threat-Prevention](./packages/threat-prevention/)                   | `@chkp/threat-prevention-mcp`                           | Query Threat Prevention policies, profiles and indicators, view IPS updates and IOC feeds                                                                                                                                       |
+| [HTTPS-Inspection](./packages/https-inspection/)                     | `@chkp/https-inspection-mcp`                            | Query Https Inspection policies, rules and exceptions                                                                                                                                                                           |
+| [Check Point SASE](./packages/harmony-sase/)                         | `@chkp/harmony-sase-mcp`                                | Query and manage Check Point SASE Regions, Networks, Applications and configurations                                                                                                                                            |
+| [Reputation Service](./packages/reputation-service/)                 | `@chkp/reputation-service-mcp`                          | Query Url, IP and File Reputation                                                                                                                                                                                               |
+| [GW CLI](./packages/gw-cli/)                                         | `@chkp/quantum-gw-cli-mcp`                              | Provides comprehensive diagnostics and analysis across hardware, network configuration, high availability, performance, security, and real-time connection debugging                                                            |
+| [GW CLI Connection Analysis](./packages/gw-cli-connection-analysis/) | `@chkp/quantum-gw-connection-analysis-mcp`              | Provides debug logs to help analyze connection issues                                                                                                                                                                           |
+| [Threat Emulation](./packages/threat-emulation/)                     | `@chkp/threat-emulation-mcp`                            | Analyze files for malware and threats using Check Point's cloud services                                                                                                                                                        |
+| [Gaia](./packages/gaia/)                                             | `@chkp/quantum-gaia-mcp`                                | Network management and interface configuration for GAIA OS                                                                                                                                                                      |
+| [Documentation Tool](./packages/documentation-tool/)                 | `@chkp/documentation-mcp`                               | Comprehensive Check Point documentation assistant providing instant access to product information, technical specifications, configuration guidance, and feature documentation across the entire Check Point security portfolio |
+| [Check Point Spark Firewall](./packages/spark-management/)           | `@chkp/spark-management-mcp`                            | Manage and monitor Check Point Spark Firewall appliances for MSPs and distributed networks.                                                                                                                                     |
+| [CPInfo Analysis](./packages/cpinfo-analysis/)                       | `@chkp/cpinfo-analysis-mcp`                             | Analyze CPInfo diagnostic files for system health, performance metrics, network configuration, and troubleshooting insights                                                                                                     |
+| [Exposure Management](./packages/argos-erm/)                         | `@chkp/argos-erm-mcp`                                   | Monitor, investigate and remediate security threats across alerts, IOCs, assets, vulnerabilities, credential exposure, threat intelligence, and organizational risk assessment                                                  |
+| [Policy Insights](./packages/policy-insights/)                       | `@chkp/policy-insights-mcp`                             | Query policy insights to tighten Access Control policies                                                                                                                                                                        |
+| [Check Point WAF](./packages/checkpoint-waf/)                        | `@chkp/checkpoint-waf-mcp`                              | Query and manage Check Point WAF assets, practices, profiles, zones, and behaviors, and publish enforcement changes                                                                                                             |
+| [CPView History](./packages/cpview-history-mcp/)                     | `@chkp/cpview-history-mcp`                              | Analyze CPView history databases (CPViewDB.dat) for gateway performance, resource utilization, hotspot detection, and incident investigation                                                                                    |
+| [Workforce AI](./packages/workforce-ai/)                             | `@chkp/workforce-ai-mcp`                                | Query and manage AI & Browse security policy - AI Access, Chats, Agents, and Secure Browsing - plus deployment and user visibility                                                                                              |
+| [Gaia Read-only Collector](./packages/gaia-readonly-collector/)      | `@focuslight-nr/checkpoint-gaia-readonly-collector-mcp` | Collect DNS, DHCP, and date/time observations through a strict read-only Gaia API surface                                                                                                                                       |
+| [Security Baseline Audit](./packages/baseline-audit/)                | `@focuslight-nr/checkpoint-baseline-audit-mcp`          | Validate and deterministically evaluate organization-authored Baseline Format v1 documents                                                                                                                                      |
+| [Baseline Audit Runner](./packages/baseline-audit-runner/)           | `@focuslight-nr/checkpoint-baseline-audit-runner`       | Run scheduled collection and evaluation for an explicitly selected baseline                                                                                                                                                     |
 
 ## Example: Setting Up an MCP Server
 
@@ -74,17 +89,15 @@ Here's an example of how to configure the Management MCP server in your MCP clie
 {
   "MCP-NAME": {
     "command": "npx",
-    "args": [
-      "@chkp/MCP_NPM_PACKAGE"
-    ],
+    "args": ["@chkp/MCP_NPM_PACKAGE"],
     "env": {
-        // Specific server configuration 
+      // Specific server configuration
     }
   }
 }
 ```
 
-__Each MCP server has its own specific configuration requirements. Please refer to the individual package README files for detailed setup instructions.__
+**Each MCP server has its own specific configuration requirements. Please refer to the individual package README files for detailed setup instructions.**
 
 ## Getting Started for Development (Not needed for users who just wish to use the MCPs)
 
@@ -106,10 +119,12 @@ npm run build
 This project uses Nx for managing the monorepo. You can use Nx commands to run tasks for specific packages:
 
 **Package Build Options:**
+
 - **Alias:** `npm run nx:build:<folder-name>` (e.g., `management`, `harmony-sase`, `infra`)
 - **Direct Nx:** `npx nx build <full-package-name>` (e.g., `@chkp/quantum-management-mcp`)
 
 ### Running Development Mode
+
 ```bash
 # Run @chkp/management in development mode
 npx nx run @chkp/quantum-management-mcp:dev
@@ -123,6 +138,7 @@ npm run nx:dev:https-inspection
 ```
 
 ### Building Specific Packages
+
 ```bash
 # Build https-inspection server
 npx nx build @chkp/https-inspection-mcp
@@ -136,6 +152,7 @@ npm run nx:build:threat-prevention
 ```
 
 ### Running Tests
+
 ```bash
 # Run tests for a specific package
 npx nx run @chkp/quantum-infra:test
@@ -145,6 +162,7 @@ npx nx run-many --target=test
 ```
 
 ### Other Useful Nx Commands
+
 ```bash
 # Show project graph
 npx nx graph
@@ -163,8 +181,8 @@ npx nx run-many --target=lint
 
 ## ⚠️ Security Notice
 
-1. **Authentication keys and credentials are never shared with the model.** They are used only by the MCP server to authenticate with your Check Point management system.  
-2. **Only use client implementations you trust.** Malicious or untrusted clients could misuse your credentials or access data improperly.  
+1. **Authentication keys and credentials are never shared with the model.** They are used only by the MCP server to authenticate with your Check Point management system.
+2. **Only use client implementations you trust.** Malicious or untrusted clients could misuse your credentials or access data improperly.
 3. **Queried Data will be exposed to the model.** Ensure that you only use models and providers that comply with your organization's policies for handling sensitive data and PII.
 
 ## 📊 Telemetry and Privacy

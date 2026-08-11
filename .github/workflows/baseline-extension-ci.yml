@@ -1,0 +1,46 @@
+name: Baseline Extension CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm run test --workspace=@focuslight-nr/checkpoint-gaia-readonly-collector-mcp
+      - run: npm run test --workspace=@focuslight-nr/checkpoint-baseline-audit-mcp
+      - run: npm run test --workspace=@focuslight-nr/checkpoint-baseline-audit-runner
+      - run: npm run build --workspace=@focuslight-nr/checkpoint-gaia-readonly-collector-mcp
+      - run: npm run build --workspace=@focuslight-nr/checkpoint-baseline-audit-mcp
+      - run: npm run build --workspace=@focuslight-nr/checkpoint-baseline-audit-runner
+
+  powershell:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - name: Parse Windows deployment templates
+        shell: pwsh
+        run: |
+          $failed = $false
+          Get-ChildItem packages/baseline-audit-runner/examples/windows -Filter *.ps1 | ForEach-Object {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) {
+              $failed = $true
+              $errors | ForEach-Object { Write-Error $_.Message }
+            }
+          }
+          if ($failed) { exit 1 }

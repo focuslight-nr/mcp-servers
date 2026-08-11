@@ -1,0 +1,15 @@
+{
+  "runnerConfigPath": "D:/secure-config/checkpoint-baseline-runner.json",
+  "runnerPath": "D:/GitHub/mcp-servers/packages/baseline-audit-runner/dist/index.js",
+  "nodePath": "C:/Program Files/nodejs/node.exe",
+  "logDirectory": "D:/checkpoint-baseline/logs",
+  "auditStorePath": "D:/checkpoint-baseline/history.json",
+  "gaiaCredentialPath": "D:/secure-config/gaia-tokyo.credential.xml",
+  "gaiaCredentialProfile": "tokyo",
+  "gaiaAllowedTargets": "192.0.2.10",
+  "gaiaCaFile": "D:/secure-config/gaia-ca.pem",
+  "managementApiKeyPath": "D:/secure-config/management-api-key.secure.xml",
+  "managementHost": "192.0.2.20",
+  "managementPort": 443,
+  "webhookUrlPath": "D:/secure-config/baseline-webhook-url.secure.xml"
+}

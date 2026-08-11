@@ -1,0 +1,49 @@
+{
+  "concurrency": 2,
+  "retries": 2,
+  "retryDelayMs": 1000,
+  "toolTimeoutMs": 60000,
+  "stateDirectory": "./state",
+  "reportDirectory": "./reports",
+  "baselinePath": "../../baseline-audit/examples/baselines/organization-gaia.json",
+  "notifications": {
+    "enabled": false,
+    "webhookUrlEnvironment": "BASELINE_AUDIT_WEBHOOK_URL",
+    "notifyOn": ["NON_COMPLIANT", "REGRESSION", "PARTIAL", "ERROR"],
+    "timeoutMs": 10000
+  },
+  "mcp": {
+    "gaia": {
+      "forwardEnvironment": [
+        "GAIA_ALLOWED_TARGETS",
+        "GAIA_CREDENTIAL_TOKYO_USERNAME",
+        "GAIA_CREDENTIAL_TOKYO_PASSWORD",
+        "GAIA_CREDENTIAL_TOKYO_CA_FILE"
+      ]
+    },
+    "management": {
+      "forwardEnvironment": ["API_KEY", "MANAGEMENT_HOST", "MANAGEMENT_PORT"]
+    },
+    "audit": {
+      "forwardEnvironment": [
+        "BASELINE_AUDIT_STORE_PATH",
+        "BASELINE_AUDIT_HISTORY_LIMIT"
+      ]
+    }
+  },
+  "targets": [
+    {
+      "id": "gateway-tokyo-01",
+      "gatewayIp": "192.0.2.10",
+      "gatewayPort": 443,
+      "credentialProfile": "tokyo",
+      "policyPackage": "Standard",
+      "accessLayer": "Network",
+      "expectedTimezone": "Asia/Tokyo",
+      "parameters": {
+        "approvedTimezone": "Asia/Tokyo"
+      },
+      "enabled": true
+    }
+  ]
+}

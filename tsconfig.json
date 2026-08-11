@@ -5,13 +5,13 @@
     "moduleResolution": "node",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,             // ✅ Skip type checking of declaration files
+    "skipLibCheck": true, // ✅ Skip type checking of declaration files
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "composite": true,
-    "declaration": true,          // ✅ Generate .d.ts files
-    "declarationMap": true,       // ✅ Generate .d.ts.map files
-    "sourceMap": true,            // ✅ Generate .js.map files
+    "declaration": true, // ✅ Generate .d.ts files
+    "declarationMap": true, // ✅ Generate .d.ts.map files
+    "sourceMap": true, // ✅ Generate .js.map files
     "outDir": "./dist",
     "rootDir": "."
   },
@@ -38,7 +38,10 @@
     { "path": "./packages/policy-insights" },
     { "path": "./packages/checkpoint-waf" },
     { "path": "./packages/cloudguard-waf" },
-    { "path": "./packages/workforce-ai" }
+    { "path": "./packages/workforce-ai" },
+    { "path": "./packages/gaia-readonly-collector" },
+    { "path": "./packages/baseline-audit" },
+    { "path": "./packages/baseline-audit-runner" }
   ],
   "files": []
 }
