@@ -29,7 +29,9 @@ flowchart LR
   Audit --> Reports[JSON and Markdown reports]
   Audit --> Planner[Baseline Change Planner MCP]
   Planner --> Proposal[Non-executable Change Plan v1]
-  Approval[External Approval Record v1] --> FakeExecutor[Fake Gaia Dry-run Executor MCP]
+  GitHubPR[GitHub pull request review] --> Adapter[GitHub Approval Adapter MCP]
+  Adapter --> Approval[External Approval Record v1]
+  Approval --> FakeExecutor[Fake Gaia Dry-run Executor MCP]
   Proposal --> FakeExecutor
   FakeExecutor --> Receipt[Dry-run Receipt v1]
   Runner --> Notify[HTTPS webhook]
@@ -94,6 +96,17 @@ Package: `packages/baseline-change-executor`
 - Uses caller-supplied synthetic Gaia state and has no Check Point credentials, network client, API, CLI, or configuration-write tool.
 - Does not authenticate approval identities; a future production adapter must verify external IdP or ticket-system signatures before providing approval records.
 
+### GitHub PR Approval Adapter MCP
+
+Package: `packages/github-approval-adapter`
+
+- Reads pull requests and reviews through the GitHub REST API using an environment-only, read-only credential.
+- Requires exact repository, base branch, reviewer, and optional label allowlists plus an exact plan marker in the pull request body.
+- Accepts only the latest review per human reviewer for the current head commit, rejects self-approval and fork pull requests, and emits expiring Approval Record Format v1 artifacts.
+- Uses the stable GitHub numeric user ID as the approval subject and retains the review URL as provenance.
+- Has no GitHub write operation, Check Point client, target credential, or configuration-write tool.
+- Does not provide end-to-end record authenticity to a future production executor; that boundary still requires a trusted channel or signed adapter attestation.
+
 ## Security boundary
 
 This project starts with read-only auditing rather than automated remediation. The main controls are:
@@ -121,6 +134,7 @@ The following checks do not require a Check Point device and have been completed
 - Security Baseline Audit MCP unit and stdio integration tests.
 - Baseline Change Planner schema, deterministic planning, safety-invariant, and stdio integration tests.
 - Approval Record and Dry-run Receipt schema tests plus Fake Gaia Executor fail-closed and stdio integration tests.
+- GitHub Approval Adapter policy, plan-marker binding, review freshness, pagination, error-redaction, and stdio integration tests using synthetic API responses.
 - Baseline Audit Runner unit and fixture integration tests.
 - Real stdio MCP client/server exchanges.
 - Fixture audit using the independently authored organization baseline example.
