@@ -15,7 +15,7 @@ The upstream Gaia and Management MCP servers make Check Point product capabiliti
 3. Compliance decisions should be reproducible code, not an unconstrained language-model judgment.
 4. Operations need retries, locking, history, reports, exit codes, and notification routing outside the audit evaluator.
 
-The extension separates those responsibilities into collection, evaluation, orchestration, and non-executable change-planning components.
+The extension separates those responsibilities into collection, evaluation, orchestration, non-executable change planning, approval validation, and fake dry-run components.
 
 ## Architecture
 
@@ -29,6 +29,9 @@ flowchart LR
   Audit --> Reports[JSON and Markdown reports]
   Audit --> Planner[Baseline Change Planner MCP]
   Planner --> Proposal[Non-executable Change Plan v1]
+  Approval[External Approval Record v1] --> FakeExecutor[Fake Gaia Dry-run Executor MCP]
+  Proposal --> FakeExecutor
+  FakeExecutor --> Receipt[Dry-run Receipt v1]
   Runner --> Notify[HTTPS webhook]
 ```
 
@@ -80,6 +83,17 @@ Package: `packages/baseline-change-planner`
 - Exposes no Check Point credentials, network client, generic API or CLI operation, approval write path, or executor.
 - Keeps approval records and future execution receipts outside the immutable proposal document.
 
+### Baseline Change Executor MCP
+
+Package: `packages/baseline-change-executor`
+
+- Validates separate Approval Record Format v1 artifacts bound to the canonical plan SHA-256 digest.
+- Requires trusted issuer, executor action, and fake backend capability allowlists.
+- Checks distinct approver counts, active rejections, expiration, target identity, state freshness, backup capability, and unchanged failed observations.
+- Produces deterministic `READY` or `BLOCKED` Dry-run Receipt Format v1 evidence with `effectsApplied: false`.
+- Uses caller-supplied synthetic Gaia state and has no Check Point credentials, network client, API, CLI, or configuration-write tool.
+- Does not authenticate approval identities; a future production adapter must verify external IdP or ticket-system signatures before providing approval records.
+
 ## Security boundary
 
 This project starts with read-only auditing rather than automated remediation. The main controls are:
@@ -93,6 +107,8 @@ This project starts with read-only auditing rather than automated remediation. T
 - Strict baseline validation and no executable expressions, scripts, network references, or file references.
 - Remediation metadata is not executable by the audit MCP or Runner.
 - Change plans are proposals with `executionAllowed: false`; the Planner cannot approve or execute them.
+- Dry-run `READY` means only that supplied synthetic artifacts passed deterministic checks; it is not authorization to change a device.
+- Approval schema validation and issuer allowlisting do not establish identity authenticity.
 - Separate scheduling and notification from evidence evaluation.
 
 Automated configuration should be implemented later as a separate component with explicit approval, a per-control operation allowlist, pre-change backup, post-change verification, and rollback behavior.
@@ -104,6 +120,7 @@ The following checks do not require a Check Point device and have been completed
 - Gaia Read-only Collector unit and stdio tests.
 - Security Baseline Audit MCP unit and stdio integration tests.
 - Baseline Change Planner schema, deterministic planning, safety-invariant, and stdio integration tests.
+- Approval Record and Dry-run Receipt schema tests plus Fake Gaia Executor fail-closed and stdio integration tests.
 - Baseline Audit Runner unit and fixture integration tests.
 - Real stdio MCP client/server exchanges.
 - Fixture audit using the independently authored organization baseline example.

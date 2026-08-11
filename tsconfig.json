@@ -41,6 +41,8 @@
     { "path": "./packages/workforce-ai" },
     { "path": "./packages/gaia-readonly-collector" },
     { "path": "./packages/baseline-audit" },
+    { "path": "./packages/baseline-change-planner" },
+    { "path": "./packages/baseline-change-executor" },
     { "path": "./packages/baseline-audit-runner" }
   ],
   "files": []

@@ -1,0 +1,90 @@
+{
+  "$schema": "https://github.com/focuslight-nr/mcp-servers/blob/main/packages/baseline-change-executor/schemas/dry-run-receipt-format-v1.schema.json",
+  "formatVersion": "1.0",
+  "receipt": {
+    "id": "dry-run-d4b6d80a83b7f5df4172",
+    "createdAt": "2026-08-11T07:10:00.000Z",
+    "mode": "DRY_RUN",
+    "status": "READY"
+  },
+  "plan": {
+    "id": "plan-36514fde038f420af509",
+    "sha256": "c59685c799c5ad2a2dcce53c3908c87aaa8f934274aad058b7434e118ebda8ea"
+  },
+  "target": "gateway-lab-01",
+  "effectsApplied": false,
+  "checks": [
+    {
+      "code": "PLAN_TARGET_MATCH",
+      "status": "PASS",
+      "message": "Fake state target matches the plan target."
+    },
+    {
+      "code": "STATE_FRESH",
+      "status": "PASS",
+      "message": "Fake state is within the configured freshness window."
+    },
+    {
+      "code": "BACKUP_AVAILABLE",
+      "status": "PASS",
+      "message": "The fake backend reports backup capability."
+    },
+    {
+      "code": "APPROVAL_PLAN_BOUND",
+      "status": "PASS",
+      "approvalId": "approval-example-001",
+      "message": "Approval is bound to this plan and known changes."
+    },
+    {
+      "code": "APPROVAL_ISSUER_TRUSTED",
+      "status": "PASS",
+      "approvalId": "approval-example-001",
+      "message": "Approval issuer is allowlisted."
+    },
+    {
+      "code": "APPROVAL_CURRENT",
+      "status": "PASS",
+      "approvalId": "approval-example-001",
+      "message": "Approval is current and was issued after the plan was generated."
+    },
+    {
+      "code": "ACTION_ALLOWED",
+      "status": "PASS",
+      "changeId": "change-ORG-GAIA-001",
+      "message": "Action is in the executor allowlist."
+    },
+    {
+      "code": "ACTION_SUPPORTED",
+      "status": "PASS",
+      "changeId": "change-ORG-GAIA-001",
+      "message": "Fake backend supports the action."
+    },
+    {
+      "code": "PRECONDITION_UNCHANGED",
+      "status": "PASS",
+      "changeId": "change-ORG-GAIA-001",
+      "message": "Observed state still matches the audited failed state."
+    },
+    {
+      "code": "NO_ACTIVE_REJECTION",
+      "status": "PASS",
+      "changeId": "change-ORG-GAIA-001",
+      "message": "No active trusted rejection applies to this change."
+    },
+    {
+      "code": "APPROVALS_SUFFICIENT",
+      "status": "PASS",
+      "changeId": "change-ORG-GAIA-001",
+      "message": "1 distinct approval(s) satisfy the requirement."
+    }
+  ],
+  "proposedActions": [
+    {
+      "changeId": "change-ORG-GAIA-001",
+      "actionId": "gaia.setDnsServers",
+      "parameters": {
+        "servers": ["192.0.2.53", "198.51.100.53"]
+      }
+    }
+  ]
+}

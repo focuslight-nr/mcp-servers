@@ -26,7 +26,7 @@ Each plan binds to the canonical SHA-256 digest of its source audit report. Plan
 
 High and critical changes require two approvals; low and medium changes require one. Missing severity defaults to medium for compatibility with older reports.
 
-The plan document is immutable proposal evidence. Future approval records and executor receipts must be separate artifacts bound to the plan digest; changing the plan invalidates those records.
+The plan document is immutable proposal evidence. Approval records and dry-run receipts remain separate artifacts bound to the plan digest; changing the plan invalidates those records. The sibling Fake Gaia Executor package validates these artifacts without applying configuration.
 
 ## Example call
 
