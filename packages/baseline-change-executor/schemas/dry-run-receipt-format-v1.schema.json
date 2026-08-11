@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/focuslight-nr/mcp-servers/blob/main/packages/baseline-change-executor/schemas/dry-run-receipt-format-v1.schema.json",
+  "title": "Check Point Dry-run Receipt Format v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "formatVersion",
+    "receipt",
+    "plan",
+    "target",
+    "effectsApplied",
+    "checks",
+    "proposedActions"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "formatVersion": { "const": "1.0" },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "createdAt", "mode", "status"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "mode": { "const": "DRY_RUN" },
+        "status": { "enum": ["READY", "BLOCKED"] }
+      }
+    },
+    "plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "sha256"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "sha256": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "target": { "type": "string", "minLength": 1 },
+    "effectsApplied": { "const": false },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "status", "message"],
+        "properties": {
+          "code": {
+            "enum": [
+              "PLAN_TARGET_MATCH",
+              "STATE_FRESH",
+              "BACKUP_AVAILABLE",
+              "ACTION_ALLOWED",
+              "ACTION_SUPPORTED",
+              "PRECONDITION_UNCHANGED",
+              "APPROVAL_PLAN_BOUND",
+              "APPROVAL_ISSUER_TRUSTED",
+              "APPROVAL_CURRENT",
+              "NO_ACTIVE_REJECTION",
+              "APPROVALS_SUFFICIENT"
+            ]
+          },
+          "status": { "enum": ["PASS", "FAIL"] },
+          "changeId": { "$ref": "#/$defs/id" },
+          "approvalId": { "$ref": "#/$defs/id" },
+          "message": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "proposedActions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["changeId", "actionId", "parameters"],
+        "properties": {
+          "changeId": { "$ref": "#/$defs/id" },
+          "actionId": { "$ref": "#/$defs/id" },
+          "parameters": { "type": "object" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._-]+$"
+    },
+    "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

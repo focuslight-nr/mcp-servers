@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/focuslight-nr/mcp-servers/blob/main/packages/baseline-change-executor/schemas/fake-gaia-state-v1.schema.json",
+  "title": "Fake Gaia State v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "target",
+    "capturedAt",
+    "observedByControl",
+    "supportedActions",
+    "backupAvailable"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "target": { "type": "string", "minLength": 1 },
+    "capturedAt": { "type": "string", "format": "date-time" },
+    "observedByControl": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "supportedActions": {
+      "type": "array",
+      "maxItems": 100,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "^[A-Za-z0-9._-]+$"
+      }
+    },
+    "backupAvailable": { "type": "boolean" }
+  }
+}

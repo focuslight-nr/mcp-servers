@@ -1,0 +1,21 @@
+{
+  "$schema": "https://github.com/focuslight-nr/mcp-servers/blob/main/packages/baseline-change-executor/schemas/approval-record-format-v1.schema.json",
+  "formatVersion": "1.0",
+  "approval": {
+    "id": "approval-example-001",
+    "planId": "plan-36514fde038f420af509",
+    "planSha256": "c59685c799c5ad2a2dcce53c3908c87aaa8f934274aad058b7434e118ebda8ea",
+    "changeIds": ["change-ORG-GAIA-001"],
+    "decision": "APPROVED",
+    "approver": {
+      "subject": "user-example-001",
+      "displayName": "Example Approver",
+      "issuer": "https://id.example.test",
+      "authentication": "external-identity-provider"
+    },
+    "approvedAt": "2026-08-11T07:01:00.000Z",
+    "expiresAt": "2026-08-11T08:00:00.000Z",
+    "reason": "Synthetic approval for the fake Gaia dry run",
+    "provenanceReference": "ticket-example-001"
+  }
+}

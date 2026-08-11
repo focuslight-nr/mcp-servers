@@ -14,6 +14,7 @@
 - **Gaia Read-only Collector MCP** は、DNS、DHCP、日時に加え、バージョン、ユーザー、パスワードポリシー、許可クライアント、SNMP、syslog、BGPの固定されたハードニング観測機能を公開します。厳格なTLS検証、対象機器の完全一致許可リスト、非対話型の認証情報プロファイルを使用します。
 - **Security Baseline Audit MCP** は、Baseline Format v1のJSONを検証し、組織独自コントロールを決定論的に評価します。また、レポート、履歴、変更、承認済み例外を管理します。
 - **Baseline Change Planner MCP** は、明示的なaction許可リストを使用し、対象となる不合格コントロールを改変不能かつ実行不可のChange Plan Format v1提案へ変換します。
+- **Baseline Change Executor MCP** は、分離された承認記録を検証し、合成Gaia状態に対して計画を評価して、設定を反映せずdry-run receiptを生成します。
 - **Baseline Audit Runner** は、選択したベースラインを読み込み、再試行、対象ロック、同時実行数の制限、スケジューラー向け終了コード、最小限のWebhook通知、Windowsタスクスケジューラーテンプレートを使用して収集と評価を統合します。
 
 現在の実装は意図的に読み取り専用に制限されています。ポリシーのインストール、Managementの変更公開、汎用的なGaia APIまたはCLI実行ツールは提供しません。
@@ -62,36 +63,38 @@ MCPは、セキュリティ管理データをモジュール化され文脈を�
   - **`/gaia-readonly-collector`** - 厳格なTLS検証と対象機器の完全一致許可リストを備えた、実験的な読み取り専用Gaiaコレクター
   - **`/baseline-audit`** - 組織独自のBaseline Format v1を評価する、コミュニティ開発の汎用監査サーバー
   - **`/baseline-change-planner`** - 実行不可のChange Plan Format v1提案を生成する、コミュニティ開発の変更Planner
+  - **`/baseline-change-executor`** - 外部承認記録とFake Gaia dry-run receiptを扱う、コミュニティ開発のExecutor
   - **`/baseline-audit-runner`** - ベースラインファイル選択、再試行、対象ロック、通知、スケジューラーテンプレートを備えたコミュニティ開発の無人監査ランナー
 
 ## 利用可能なMCPサーバー
 
 このリポジトリでは、次のMCPサーバーを利用できます。
 
-| MCPサーバー                                                          | パッケージ名                                            | 説明                                                                                                                                        |
-| -------------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Management](./packages/management/)                                 | `@chkp/quantum-management-mcp`                          | ポリシー、ルール、オブジェクト、ネットワークトポロジーの照会                                                                                |
-| [Management Logs](./packages/management-logs/)                       | `@chkp/management-logs-mcp`                             | 接続ログおよび監査ログの照会と分析                                                                                                          |
-| [Threat-Prevention](./packages/threat-prevention/)                   | `@chkp/threat-prevention-mcp`                           | Threat Preventionポリシー、プロファイル、インジケーター、IPS更新、IOCフィードの照会                                                         |
-| [HTTPS-Inspection](./packages/https-inspection/)                     | `@chkp/https-inspection-mcp`                            | HTTPS Inspectionポリシー、ルール、例外の照会                                                                                                |
-| [Check Point SASE](./packages/harmony-sase/)                         | `@chkp/harmony-sase-mcp`                                | Check Point SASEのリージョン、ネットワーク、アプリケーション、設定の照会と管理                                                              |
-| [Reputation Service](./packages/reputation-service/)                 | `@chkp/reputation-service-mcp`                          | URL、IP、ファイルのレピュテーション照会                                                                                                     |
-| [GW CLI](./packages/gw-cli/)                                         | `@chkp/quantum-gw-cli-mcp`                              | ハードウェア、ネットワーク設定、高可用性、性能、セキュリティ、リアルタイム接続デバッグに関する診断と分析                                    |
-| [GW CLI Connection Analysis](./packages/gw-cli-connection-analysis/) | `@chkp/quantum-gw-connection-analysis-mcp`              | 接続問題を分析するためのデバッグログ取得                                                                                                    |
-| [Threat Emulation](./packages/threat-emulation/)                     | `@chkp/threat-emulation-mcp`                            | Check Pointクラウドサービスによるファイルのマルウェアおよび脅威分析                                                                         |
-| [Gaia](./packages/gaia/)                                             | `@chkp/quantum-gaia-mcp`                                | GAIA OSのネットワーク管理とインターフェース設定                                                                                             |
-| [Documentation Tool](./packages/documentation-tool/)                 | `@chkp/documentation-mcp`                               | Check Point製品の情報、技術仕様、設定ガイダンス、機能文書へのアクセス                                                                       |
-| [Check Point Spark Firewall](./packages/spark-management/)           | `@chkp/spark-management-mcp`                            | MSPおよび分散ネットワーク向けCheck Point Spark Firewallアプライアンスの管理と監視                                                           |
-| [CPInfo Analysis](./packages/cpinfo-analysis/)                       | `@chkp/cpinfo-analysis-mcp`                             | システム正常性、性能指標、ネットワーク設定、トラブルシューティングに関するCPInfo診断ファイルの分析                                          |
-| [Exposure Management](./packages/argos-erm/)                         | `@chkp/argos-erm-mcp`                                   | アラート、IOC、資産、脆弱性、認証情報漏えい、脅威インテリジェンス、組織リスクの監視、調査、修復                                             |
-| [Policy Insights](./packages/policy-insights/)                       | `@chkp/policy-insights-mcp`                             | Access Controlポリシーを強化するためのインサイト照会                                                                                        |
-| [Check Point WAF](./packages/checkpoint-waf/)                        | `@chkp/checkpoint-waf-mcp`                              | Check Point WAFの資産、プラクティス、プロファイル、ゾーン、動作の照会と管理、および適用変更の公開                                           |
-| [CPView History](./packages/cpview-history-mcp/)                     | `@chkp/cpview-history-mcp`                              | ゲートウェイの性能、リソース使用率、ホットスポット、インシデント調査に関するCPView履歴データベースの分析                                    |
-| [Workforce AI](./packages/workforce-ai/)                             | `@chkp/workforce-ai-mcp`                                | AI Access、Chats、Agents、Secure Browsingを対象とするAIおよびブラウズポリシーの照会と管理、展開、ユーザー可視化                             |
-| [Gaia Read-only Collector](./packages/gaia-readonly-collector/)      | `@focuslight-nr/checkpoint-gaia-readonly-collector-mcp` | 厳格な読み取り専用Gaia APIを通じたDNS、DHCP、日時、ハードニング状態の固定観測                                                               |
-| [Security Baseline Audit](./packages/baseline-audit/)                | `@focuslight-nr/checkpoint-baseline-audit-mcp`          | Baseline Format v1を検証し、組織独自コントロールを決定論的に評価して、レポート、履歴、変更、承認済み例外を保持                              |
-| [Baseline Change Planner](./packages/baseline-change-planner/)       | `@focuslight-nr/checkpoint-baseline-change-planner-mcp` | 許可された不合格コントロールから、改変不能かつ実行不可のChange Plan Format v1提案を生成                                                     |
-| [Baseline Audit Runner](./packages/baseline-audit-runner/)           | `@focuslight-nr/checkpoint-baseline-audit-runner`       | 選択したベースラインについて、再試行、ロック、同時実行数の制限、通知、Windowsタスクスケジューラーテンプレートを使用した無人収集・評価を実行 |
+| MCPサーバー                                                          | パッケージ名                                             | 説明                                                                                                                                        |
+| -------------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Management](./packages/management/)                                 | `@chkp/quantum-management-mcp`                           | ポリシー、ルール、オブジェクト、ネットワークトポロジーの照会                                                                                |
+| [Management Logs](./packages/management-logs/)                       | `@chkp/management-logs-mcp`                              | 接続ログおよび監査ログの照会と分析                                                                                                          |
+| [Threat-Prevention](./packages/threat-prevention/)                   | `@chkp/threat-prevention-mcp`                            | Threat Preventionポリシー、プロファイル、インジケーター、IPS更新、IOCフィードの照会                                                         |
+| [HTTPS-Inspection](./packages/https-inspection/)                     | `@chkp/https-inspection-mcp`                             | HTTPS Inspectionポリシー、ルール、例外の照会                                                                                                |
+| [Check Point SASE](./packages/harmony-sase/)                         | `@chkp/harmony-sase-mcp`                                 | Check Point SASEのリージョン、ネットワーク、アプリケーション、設定の照会と管理                                                              |
+| [Reputation Service](./packages/reputation-service/)                 | `@chkp/reputation-service-mcp`                           | URL、IP、ファイルのレピュテーション照会                                                                                                     |
+| [GW CLI](./packages/gw-cli/)                                         | `@chkp/quantum-gw-cli-mcp`                               | ハードウェア、ネットワーク設定、高可用性、性能、セキュリティ、リアルタイム接続デバッグに関する診断と分析                                    |
+| [GW CLI Connection Analysis](./packages/gw-cli-connection-analysis/) | `@chkp/quantum-gw-connection-analysis-mcp`               | 接続問題を分析するためのデバッグログ取得                                                                                                    |
+| [Threat Emulation](./packages/threat-emulation/)                     | `@chkp/threat-emulation-mcp`                             | Check Pointクラウドサービスによるファイルのマルウェアおよび脅威分析                                                                         |
+| [Gaia](./packages/gaia/)                                             | `@chkp/quantum-gaia-mcp`                                 | GAIA OSのネットワーク管理とインターフェース設定                                                                                             |
+| [Documentation Tool](./packages/documentation-tool/)                 | `@chkp/documentation-mcp`                                | Check Point製品の情報、技術仕様、設定ガイダンス、機能文書へのアクセス                                                                       |
+| [Check Point Spark Firewall](./packages/spark-management/)           | `@chkp/spark-management-mcp`                             | MSPおよび分散ネットワーク向けCheck Point Spark Firewallアプライアンスの管理と監視                                                           |
+| [CPInfo Analysis](./packages/cpinfo-analysis/)                       | `@chkp/cpinfo-analysis-mcp`                              | システム正常性、性能指標、ネットワーク設定、トラブルシューティングに関するCPInfo診断ファイルの分析                                          |
+| [Exposure Management](./packages/argos-erm/)                         | `@chkp/argos-erm-mcp`                                    | アラート、IOC、資産、脆弱性、認証情報漏えい、脅威インテリジェンス、組織リスクの監視、調査、修復                                             |
+| [Policy Insights](./packages/policy-insights/)                       | `@chkp/policy-insights-mcp`                              | Access Controlポリシーを強化するためのインサイト照会                                                                                        |
+| [Check Point WAF](./packages/checkpoint-waf/)                        | `@chkp/checkpoint-waf-mcp`                               | Check Point WAFの資産、プラクティス、プロファイル、ゾーン、動作の照会と管理、および適用変更の公開                                           |
+| [CPView History](./packages/cpview-history-mcp/)                     | `@chkp/cpview-history-mcp`                               | ゲートウェイの性能、リソース使用率、ホットスポット、インシデント調査に関するCPView履歴データベースの分析                                    |
+| [Workforce AI](./packages/workforce-ai/)                             | `@chkp/workforce-ai-mcp`                                 | AI Access、Chats、Agents、Secure Browsingを対象とするAIおよびブラウズポリシーの照会と管理、展開、ユーザー可視化                             |
+| [Gaia Read-only Collector](./packages/gaia-readonly-collector/)      | `@focuslight-nr/checkpoint-gaia-readonly-collector-mcp`  | 厳格な読み取り専用Gaia APIを通じたDNS、DHCP、日時、ハードニング状態の固定観測                                                               |
+| [Security Baseline Audit](./packages/baseline-audit/)                | `@focuslight-nr/checkpoint-baseline-audit-mcp`           | Baseline Format v1を検証し、組織独自コントロールを決定論的に評価して、レポート、履歴、変更、承認済み例外を保持                              |
+| [Baseline Change Planner](./packages/baseline-change-planner/)       | `@focuslight-nr/checkpoint-baseline-change-planner-mcp`  | 許可された不合格コントロールから、改変不能かつ実行不可のChange Plan Format v1提案を生成                                                     |
+| [Baseline Change Executor](./packages/baseline-change-executor/)     | `@focuslight-nr/checkpoint-baseline-change-executor-mcp` | 外部承認記録を検証し、設定を反映せずFake Gaia状態に対するdry-runを評価                                                                      |
+| [Baseline Audit Runner](./packages/baseline-audit-runner/)           | `@focuslight-nr/checkpoint-baseline-audit-runner`        | 選択したベースラインについて、再試行、ロック、同時実行数の制限、通知、Windowsタスクスケジューラーテンプレートを使用した無人収集・評価を実行 |
 
 ## MCPサーバーの設定例
 
