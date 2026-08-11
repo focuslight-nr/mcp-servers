@@ -15,6 +15,7 @@
 - **Security Baseline Audit MCP** は、Baseline Format v1のJSONを検証し、組織独自コントロールを決定論的に評価します。また、レポート、履歴、変更、承認済み例外を管理します。
 - **Baseline Change Planner MCP** は、明示的なaction許可リストを使用し、対象となる不合格コントロールを改変不能かつ実行不可のChange Plan Format v1提案へ変換します。
 - **Baseline Change Executor MCP** は、分離された承認記録を検証し、合成Gaia状態に対して計画を評価して、設定を反映せずdry-run receiptを生成します。
+- **GitHub PR Approval Adapter MCP** は、厳格に許可したPull Requestを読み取り、現在のplanとhead commitに対するポリシー適合レビューを期限付きApproval Record v1へ変換します。
 - **Baseline Audit Runner** は、選択したベースラインを読み込み、再試行、対象ロック、同時実行数の制限、スケジューラー向け終了コード、最小限のWebhook通知、Windowsタスクスケジューラーテンプレートを使用して収集と評価を統合します。
 
 現在の実装は意図的に読み取り専用に制限されています。ポリシーのインストール、Managementの変更公開、汎用的なGaia APIまたはCLI実行ツールは提供しません。
@@ -64,6 +65,7 @@ MCPは、セキュリティ管理データをモジュール化され文脈を�
   - **`/baseline-audit`** - 組織独自のBaseline Format v1を評価する、コミュニティ開発の汎用監査サーバー
   - **`/baseline-change-planner`** - 実行不可のChange Plan Format v1提案を生成する、コミュニティ開発の変更Planner
   - **`/baseline-change-executor`** - 外部承認記録とFake Gaia dry-run receiptを扱う、コミュニティ開発のExecutor
+  - **`/github-approval-adapter`** - GitHub PRレビューをApproval Recordへ変換する、コミュニティ開発の読み取り専用Adapter
   - **`/baseline-audit-runner`** - ベースラインファイル選択、再試行、対象ロック、通知、スケジューラーテンプレートを備えたコミュニティ開発の無人監査ランナー
 
 ## 利用可能なMCPサーバー
@@ -94,6 +96,7 @@ MCPは、セキュリティ管理データをモジュール化され文脈を�
 | [Security Baseline Audit](./packages/baseline-audit/)                | `@focuslight-nr/checkpoint-baseline-audit-mcp`           | Baseline Format v1を検証し、組織独自コントロールを決定論的に評価して、レポート、履歴、変更、承認済み例外を保持                              |
 | [Baseline Change Planner](./packages/baseline-change-planner/)       | `@focuslight-nr/checkpoint-baseline-change-planner-mcp`  | 許可された不合格コントロールから、改変不能かつ実行不可のChange Plan Format v1提案を生成                                                     |
 | [Baseline Change Executor](./packages/baseline-change-executor/)     | `@focuslight-nr/checkpoint-baseline-change-executor-mcp` | 外部承認記録を検証し、設定を反映せずFake Gaia状態に対するdry-runを評価                                                                      |
+| [GitHub PR Approval Adapter](./packages/github-approval-adapter/)    | `@focuslight-nr/checkpoint-github-approval-adapter-mcp`  | 許可したGitHub PRの現在のplanとhead commitに対するレビューを、期限付きApproval Record v1へ変換                                             |
 | [Baseline Audit Runner](./packages/baseline-audit-runner/)           | `@focuslight-nr/checkpoint-baseline-audit-runner`        | 選択したベースラインについて、再試行、ロック、同時実行数の制限、通知、Windowsタスクスケジューラーテンプレートを使用した無人収集・評価を実行 |
 
 ## MCPサーバーの設定例

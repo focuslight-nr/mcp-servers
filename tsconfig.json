@@ -43,6 +43,7 @@
     { "path": "./packages/baseline-audit" },
     { "path": "./packages/baseline-change-planner" },
     { "path": "./packages/baseline-change-executor" },
+    { "path": "./packages/github-approval-adapter" },
     { "path": "./packages/baseline-audit-runner" }
   ],
   "files": []

@@ -10,6 +10,7 @@ This fork adds a deliberately narrow path for unattended security baseline audit
 - **Security Baseline Audit MCP** validates Baseline Format v1 and evaluates organization-authored controls deterministically.
 - **Baseline Change Planner MCP** converts eligible failed controls into immutable, non-executable Change Plan Format v1 proposals using an explicit action allowlist.
 - **Baseline Change Executor MCP** validates separate approval records and evaluates plans against synthetic Gaia state, producing dry-run receipts without applying effects.
+- **GitHub PR Approval Adapter MCP** reads tightly allowlisted pull requests and converts current, policy-compliant reviews into plan-bound Approval Record v1 artifacts.
 - **Baseline Audit Runner** collects only inputs declared by a baseline, persists reports and history, and supports scheduled operation.
 
 No third-party benchmark publication is bundled. An independently authored profile maps selected public Check Point hardening recommendations to automatic and manual checks. The extension is read-only: remediation identifiers are metadata and are never executed. See [Experimental Read-only Audit Extension](./docs/experimental-baseline-audit-extension.md) for architecture, security boundaries, and validation status.
@@ -55,6 +56,7 @@ This monorepo is organized with each Check Point security domain as a separate M
   - **`/baseline-audit`** - Community-developed deterministic Baseline Format v1 audit MCP
   - **`/baseline-change-planner`** - Community-developed non-executable Change Plan Format v1 proposal MCP
   - **`/baseline-change-executor`** - Community-developed fake Gaia approval and dry-run receipt MCP
+  - **`/github-approval-adapter`** - Community-developed read-only GitHub PR review to Approval Record adapter
   - **`/baseline-audit-runner`** - Community-developed unattended baseline audit runner
 
 ## Available MCP Servers
@@ -85,6 +87,7 @@ The following MCP servers are available in this repository:
 | [Security Baseline Audit](./packages/baseline-audit/)                | `@focuslight-nr/checkpoint-baseline-audit-mcp`           | Validate and deterministically evaluate organization-authored Baseline Format v1 documents                                                                                                                                      |
 | [Baseline Change Planner](./packages/baseline-change-planner/)       | `@focuslight-nr/checkpoint-baseline-change-planner-mcp`  | Generate immutable, non-executable Change Plan Format v1 proposals from allowlisted failed controls                                                                                                                             |
 | [Baseline Change Executor](./packages/baseline-change-executor/)     | `@focuslight-nr/checkpoint-baseline-change-executor-mcp` | Validate external approval records and evaluate plans against fake Gaia state without applying configuration                                                                                                                    |
+| [GitHub PR Approval Adapter](./packages/github-approval-adapter/)    | `@focuslight-nr/checkpoint-github-approval-adapter-mcp`  | Convert allowlisted GitHub PR reviews for the current plan and head commit into expiring Approval Record v1 artifacts                                                                                                           |
 | [Baseline Audit Runner](./packages/baseline-audit-runner/)           | `@focuslight-nr/checkpoint-baseline-audit-runner`        | Run scheduled collection and evaluation for an explicitly selected baseline                                                                                                                                                     |
 
 ## Example: Setting Up an MCP Server

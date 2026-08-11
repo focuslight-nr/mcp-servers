@@ -23,11 +23,13 @@ jobs:
       - run: npm run test --workspace=@focuslight-nr/checkpoint-baseline-audit-mcp
       - run: npm run test --workspace=@focuslight-nr/checkpoint-baseline-change-planner-mcp
       - run: npm run test --workspace=@focuslight-nr/checkpoint-baseline-change-executor-mcp
+      - run: npm run test --workspace=@focuslight-nr/checkpoint-github-approval-adapter-mcp
       - run: npm run test --workspace=@focuslight-nr/checkpoint-baseline-audit-runner
       - run: npm run build --workspace=@focuslight-nr/checkpoint-gaia-readonly-collector-mcp
       - run: npm run build --workspace=@focuslight-nr/checkpoint-baseline-audit-mcp
       - run: npm run build --workspace=@focuslight-nr/checkpoint-baseline-change-planner-mcp
       - run: npm run build --workspace=@focuslight-nr/checkpoint-baseline-change-executor-mcp
+      - run: npm run build --workspace=@focuslight-nr/checkpoint-github-approval-adapter-mcp
       - run: npm run build --workspace=@focuslight-nr/checkpoint-baseline-audit-runner
 
   powershell:
