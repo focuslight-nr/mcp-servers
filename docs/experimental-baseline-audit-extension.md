@@ -15,7 +15,7 @@ The upstream Gaia and Management MCP servers make Check Point product capabiliti
 3. Compliance decisions should be reproducible code, not an unconstrained language-model judgment.
 4. Operations need retries, locking, history, reports, exit codes, and notification routing outside the audit evaluator.
 
-The extension separates those responsibilities into collection, evaluation, and orchestration components.
+The extension separates those responsibilities into collection, evaluation, orchestration, and non-executable change-planning components.
 
 ## Architecture
 
@@ -27,6 +27,8 @@ flowchart LR
   Collector --> Audit[Security Baseline Audit MCP]
   Management --> Audit
   Audit --> Reports[JSON and Markdown reports]
+  Audit --> Planner[Baseline Change Planner MCP]
+  Planner --> Proposal[Non-executable Change Plan v1]
   Runner --> Notify[HTTPS webhook]
 ```
 
@@ -68,6 +70,16 @@ Package: `packages/baseline-audit-runner`
 - Sends a minimal HTTPS webhook summary for configured result statuses.
 - Includes Windows Task Scheduler and DPAPI credential-loading templates.
 
+### Baseline Change Planner MCP
+
+Package: `packages/baseline-change-planner`
+
+- Accepts only read-only audit reports and an explicit action allowlist.
+- Produces immutable Change Plan Format v1 proposals bound to the source audit SHA-256 digest.
+- Includes failed-state preconditions, risk, human approval requirements, verification, backup, and rollback requirements.
+- Exposes no Check Point credentials, network client, generic API or CLI operation, approval write path, or executor.
+- Keeps approval records and future execution receipts outside the immutable proposal document.
+
 ## Security boundary
 
 This project starts with read-only auditing rather than automated remediation. The main controls are:
@@ -80,6 +92,7 @@ This project starts with read-only auditing rather than automated remediation. T
 - Deterministic evaluation independent of an LLM.
 - Strict baseline validation and no executable expressions, scripts, network references, or file references.
 - Remediation metadata is not executable by the audit MCP or Runner.
+- Change plans are proposals with `executionAllowed: false`; the Planner cannot approve or execute them.
 - Separate scheduling and notification from evidence evaluation.
 
 Automated configuration should be implemented later as a separate component with explicit approval, a per-control operation allowlist, pre-change backup, post-change verification, and rollback behavior.
@@ -90,6 +103,7 @@ The following checks do not require a Check Point device and have been completed
 
 - Gaia Read-only Collector unit and stdio tests.
 - Security Baseline Audit MCP unit and stdio integration tests.
+- Baseline Change Planner schema, deterministic planning, safety-invariant, and stdio integration tests.
 - Baseline Audit Runner unit and fixture integration tests.
 - Real stdio MCP client/server exchanges.
 - Fixture audit using the independently authored organization baseline example.

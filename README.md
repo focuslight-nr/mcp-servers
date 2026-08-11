@@ -8,6 +8,7 @@ This fork adds a deliberately narrow path for unattended security baseline audit
 
 - **Gaia Read-only Collector MCP** exposes fixed DNS, DHCP, date/time, and hardening-state observations with strict TLS validation and an exact target allowlist.
 - **Security Baseline Audit MCP** validates Baseline Format v1 and evaluates organization-authored controls deterministically.
+- **Baseline Change Planner MCP** converts eligible failed controls into immutable, non-executable Change Plan Format v1 proposals using an explicit action allowlist.
 - **Baseline Audit Runner** collects only inputs declared by a baseline, persists reports and history, and supports scheduled operation.
 
 No third-party benchmark publication is bundled. An independently authored profile maps selected public Check Point hardening recommendations to automatic and manual checks. The extension is read-only: remediation identifiers are metadata and are never executed. See [Experimental Read-only Audit Extension](./docs/experimental-baseline-audit-extension.md) for architecture, security boundaries, and validation status.
@@ -51,6 +52,7 @@ This monorepo is organized with each Check Point security domain as a separate M
   - **`/workforce-ai`** - Workforce AI MCP server for AI & Browse policy security management for AI Access, Chats, Agents and Secure Browsing, plus deployment and user visibility
   - **`/gaia-readonly-collector`** - Community-developed Gaia collector with a fixed read-only API surface
   - **`/baseline-audit`** - Community-developed deterministic Baseline Format v1 audit MCP
+  - **`/baseline-change-planner`** - Community-developed non-executable Change Plan Format v1 proposal MCP
   - **`/baseline-audit-runner`** - Community-developed unattended baseline audit runner
 
 ## Available MCP Servers
@@ -77,8 +79,9 @@ The following MCP servers are available in this repository:
 | [Check Point WAF](./packages/checkpoint-waf/)                        | `@chkp/checkpoint-waf-mcp`                              | Query and manage Check Point WAF assets, practices, profiles, zones, and behaviors, and publish enforcement changes                                                                                                             |
 | [CPView History](./packages/cpview-history-mcp/)                     | `@chkp/cpview-history-mcp`                              | Analyze CPView history databases (CPViewDB.dat) for gateway performance, resource utilization, hotspot detection, and incident investigation                                                                                    |
 | [Workforce AI](./packages/workforce-ai/)                             | `@chkp/workforce-ai-mcp`                                | Query and manage AI & Browse security policy - AI Access, Chats, Agents, and Secure Browsing - plus deployment and user visibility                                                                                              |
-| [Gaia Read-only Collector](./packages/gaia-readonly-collector/)      | `@focuslight-nr/checkpoint-gaia-readonly-collector-mcp` | Collect fixed DNS, DHCP, date/time, and hardening-state observations through a strict read-only Gaia API surface                                                                                                                 |
+| [Gaia Read-only Collector](./packages/gaia-readonly-collector/)      | `@focuslight-nr/checkpoint-gaia-readonly-collector-mcp` | Collect fixed DNS, DHCP, date/time, and hardening-state observations through a strict read-only Gaia API surface                                                                                                                |
 | [Security Baseline Audit](./packages/baseline-audit/)                | `@focuslight-nr/checkpoint-baseline-audit-mcp`          | Validate and deterministically evaluate organization-authored Baseline Format v1 documents                                                                                                                                      |
+| [Baseline Change Planner](./packages/baseline-change-planner/)       | `@focuslight-nr/checkpoint-baseline-change-planner-mcp` | Generate immutable, non-executable Change Plan Format v1 proposals from allowlisted failed controls                                                                                                                             |
 | [Baseline Audit Runner](./packages/baseline-audit-runner/)           | `@focuslight-nr/checkpoint-baseline-audit-runner`       | Run scheduled collection and evaluation for an explicitly selected baseline                                                                                                                                                     |
 
 ## Example: Setting Up an MCP Server

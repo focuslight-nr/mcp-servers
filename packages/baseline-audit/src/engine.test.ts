@@ -87,6 +87,7 @@ test("evaluates an organization-authored baseline", () => {
   assert.equal(report.summary.pass, 3);
   assert.equal(report.summary.fail, 0);
   assert.equal(report.readOnly, true);
+  assert.equal(report.results[0]?.severity, "medium");
 });
 
 test("returns violating collection items as evidence", () => {
