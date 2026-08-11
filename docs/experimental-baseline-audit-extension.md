@@ -111,16 +111,16 @@ This repository does not include third-party benchmark publications. It includes
 
 Users who load external baseline content are responsible for obtaining it lawfully, complying with its license and trademark terms, and validating that the implemented assertions accurately represent their intended policy. An audit result is evidence from the supplied observations, not a product certification.
 
-## Publishing this fork
+## Maintaining and redistributing this fork
 
-Before making the fork public:
+This section is for maintainers of this public fork and anyone who redistributes or derives another fork from it. The repository follows these ongoing publication and maintenance requirements:
 
-1. Keep the upstream `LICENSE` and copyright notice.
-2. Identify the fork as community-developed and unofficial in the repository description and README.
-3. Do not include third-party benchmark publications, production reports, credentials, CA private keys, DPAPI files, or real target configuration.
-4. Use documentation-only IP ranges and synthetic fixtures.
-5. Run secret scanning, tests, builds, and dependency review in CI.
-6. Keep fork-owned packages private until a separate npm publication and naming review is complete.
-7. Disable upstream release automation and use fork-owned test and build workflows.
+1. Preserve the upstream `LICENSE` and copyright notice.
+2. Continue to identify the fork as community-developed and unofficial in the repository description and README.
+3. Do not commit third-party benchmark publications, production reports, credentials, CA private keys, DPAPI files, or real target configuration.
+4. Use documentation-only IP ranges and synthetic fixtures in published examples and tests.
+5. Protect changes with secret scanning, tests, builds, and dependency review in CI.
+6. Keep fork-owned packages unpublished until a separate npm publication and naming review is complete.
+7. Keep upstream release automation disabled and use fork-owned test and build workflows.
 
 For an upstream contribution, follow the upstream contribution process and let the maintainers decide package naming, scope, ownership, and product positioning.

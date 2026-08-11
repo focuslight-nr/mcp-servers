@@ -19,7 +19,7 @@
 
 第三者のベンチマーク本文は同梱していません。公開されているCheck Point Gateway and Management Hardening Administration Guideの推奨事項を簡潔に対応付けた、独自作成の監査Profileを含みます。このProfileはCheck Point公式のベースライン、認証、原文書の代替ではありません。取得できない項目は合格とせず、手動確認として扱います。
 
-作成の背景、アーキテクチャ、セキュリティ境界、検証状況、公開時の注意事項については、[実験的な読み取り専用監査拡張](./docs/experimental-baseline-audit-extension.md)を参照してください。
+作成の背景、アーキテクチャ、セキュリティ境界、検証状況、公開・保守方針については、[実験的な読み取り専用監査拡張](./docs/experimental-baseline-audit-extension.md)を参照してください。
 
 ## MCPとは
 
