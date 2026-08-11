@@ -1,0 +1,65 @@
+{
+  "$schema": "../../schemas/baseline-format-v1.schema.json",
+  "formatVersion": "1.0",
+  "baseline": {
+    "id": "example-organization-gaia",
+    "version": "2026.1",
+    "title": "Example Organization Gaia Baseline",
+    "description": "An independently authored organization baseline example.",
+    "vendor": "Example Organization",
+    "platform": "Check Point Gaia"
+  },
+  "inputs": ["gaia.dns", "gaia.dhcp", "gaia.dateTime"],
+  "controls": [
+    {
+      "id": "ORG-GAIA-001",
+      "title": "At least two DNS servers are configured",
+      "severity": "medium",
+      "expected": "At least two DNS servers",
+      "assertion": {
+        "path": "gaia.dnsServers",
+        "operator": "minItems",
+        "value": 2
+      },
+      "remediation": {
+        "action": "gaia.setDnsServers"
+      }
+    },
+    {
+      "id": "ORG-GAIA-002",
+      "title": "DHCP server is disabled",
+      "severity": "high",
+      "expected": "DHCP disabled",
+      "assertion": {
+        "path": "gaia.dhcpEnabled",
+        "operator": "equals",
+        "value": false
+      },
+      "remediation": {
+        "action": "gaia.disableDhcp"
+      }
+    },
+    {
+      "id": "ORG-GAIA-003",
+      "title": "Timezone matches the organization-approved value",
+      "severity": "low",
+      "expected": "Configured timezone matches parameters.approvedTimezone",
+      "manualWhen": {
+        "path": "parameters.approvedTimezone",
+        "operator": "notExists"
+      },
+      "assertion": {
+        "path": "gaia.timezone",
+        "operator": "equals",
+        "valuePath": "parameters.approvedTimezone",
+        "caseInsensitive": true
+      },
+      "remediation": {
+        "action": "gaia.setTimezone",
+        "parameters": {
+          "timezoneFrom": "parameters.approvedTimezone"
+        }
+      }
+    }
+  ]
+}

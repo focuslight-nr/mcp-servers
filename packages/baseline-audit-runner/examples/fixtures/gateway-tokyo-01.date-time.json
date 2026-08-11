@@ -1,0 +1,9 @@
+{
+  "ntp_configuration": {
+    "enabled": true,
+    "servers": ["192.0.2.123", "198.51.100.123"]
+  },
+  "current_time_date": {
+    "timezone": "Asia/Tokyo"
+  }
+}

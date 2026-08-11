@@ -48,3 +48,7 @@ Thumbs.db
 
 # Nx cache and workspace data
 .nx/
+
+# Baseline audit runtime state and reports
+**/.baseline-audit/
+**/.baseline-runner/

@@ -1,0 +1,29 @@
+{
+  "from": 1,
+  "to": 2,
+  "total": 2,
+  "rulebase": [
+    {
+      "type": "access-rule",
+      "rule-number": 1,
+      "name": "Web application",
+      "source": [{ "name": "Web clients" }],
+      "destination": [{ "name": "Web servers" }],
+      "service": [{ "name": "https" }],
+      "action": { "name": "Accept" },
+      "track": { "name": "Log" },
+      "enabled": true
+    },
+    {
+      "type": "access-rule",
+      "rule-number": 2,
+      "name": "Cleanup",
+      "source": [{ "name": "Any" }],
+      "destination": [{ "name": "Any" }],
+      "service": [{ "name": "Any" }],
+      "action": { "name": "Drop" },
+      "track": { "name": "Log" },
+      "enabled": true
+    }
+  ]
+}
