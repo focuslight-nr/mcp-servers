@@ -16,7 +16,8 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:http-settings": "node tests/build-http-settings-targets.mjs && node --test tests/http-settings.test.mjs"
   },
   "dependencies": {
     "@chkp/mcp-utils": "*",

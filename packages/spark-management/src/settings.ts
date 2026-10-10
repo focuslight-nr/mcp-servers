@@ -4,12 +4,14 @@ import { Settings as BaseSettings } from '@chkp/quantum-infra';
 export class Settings extends BaseSettings {
 
   constructor({
-    clientId = process.env.CLIENT_ID,
-    secretKey = process.env.SECRET_KEY,
-    infinityPortalUrl = process.env.INFINITY_PORTAL_URL,
-    region = process.env.REGION || 'EU',
+    useEnvironmentDefaults = true,
+    clientId = useEnvironmentDefaults ? process.env.CLIENT_ID : undefined,
+    secretKey = useEnvironmentDefaults ? process.env.SECRET_KEY : undefined,
+    infinityPortalUrl = useEnvironmentDefaults ? process.env.INFINITY_PORTAL_URL : undefined,
+    region = (useEnvironmentDefaults ? process.env.REGION : undefined) || 'EU',
     ...baseArgs
   }: {
+    useEnvironmentDefaults?: boolean;
     clientId?: string;
     secretKey?: string;
     /**
@@ -30,6 +32,7 @@ export class Settings extends BaseSettings {
     //  2. Infer and update the region from the URL when possible
     // If infinityPortalUrl is not provided, the base class falls back to region.
     super({
+      useEnvironmentDefaults,
       clientId,
       secretKey,
       region: region as any,
@@ -75,6 +78,7 @@ export class Settings extends BaseSettings {
     const region = getHeaderValue(headers, 'REGION');
 
     return new Settings({
+      useEnvironmentDefaults: false,
       clientId,
       secretKey,
       infinityPortalUrl,
