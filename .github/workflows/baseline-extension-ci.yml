@@ -22,7 +22,6 @@ jobs:
       - run: npm run test:upstream
       - run: npm run test:http-settings --workspace=@chkp/quantum-infra
       - run: npm run test --workspace=@chkp/checkpoint-waf-mcp
-      - run: npm run build:tsc --workspace=@chkp/checkpoint-waf-mcp
       - run: npm run test --workspace=@chkp/argos-erm-mcp
       - run: npm run test --workspace=@focuslight-nr/checkpoint-gaia-readonly-collector-mcp
       - run: npm run test --workspace=@focuslight-nr/checkpoint-baseline-audit-mcp

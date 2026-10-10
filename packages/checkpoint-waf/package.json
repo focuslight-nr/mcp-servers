@@ -26,7 +26,7 @@
     "start": "node dist/index.js",
     "prepack": "node ../../scripts/strip-bundled-deps.js",
     "postpack": "node ../../scripts/strip-bundled-deps.js restore",
-    "test": "tsc -b ../mcp-utils ../infra && esbuild src/graphql-guard.ts src/settings.ts src/api-manager.ts --outdir=dist --platform=node --format=esm && node --test tests/*.test.mjs"
+    "test": "tsc -b ../mcp-utils ../infra . --force && node --test tests/*.test.mjs"
   },
   "dependencies": {
     "@chkp/mcp-utils": "*",
