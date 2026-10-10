@@ -18,6 +18,7 @@ jobs:
           node-version: "20"
           cache: npm
       - run: npm ci --ignore-scripts
+      - run: npm run test:dependency-patches
       - run: npm audit --omit=dev --audit-level=high
       - run: npm run test:upstream
       - run: npm run test:http-settings --workspace=@chkp/quantum-infra

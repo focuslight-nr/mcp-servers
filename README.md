@@ -129,6 +129,11 @@ resolution, then regenerate the lockfile with `npm install --package-lock-only -
 The Nx plugins remain on 23.0.2 to support the existing ESLint 8 configuration;
 the Nx core is updated independently to 23.3.0.
 
+Normal dependency installation also applies the source patches described in
+[the development dependency patch notes](scripts-internal/dependency-patches.md).
+After installing with `--ignore-scripts`, run `npm run deps:patch` before using
+development tools. CI applies and tests these patches explicitly.
+
 ## Nx Workspace Commands
 
 This project uses Nx for managing the monorepo. You can use Nx commands to run tasks for specific packages:

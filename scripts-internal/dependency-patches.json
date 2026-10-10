@@ -1,0 +1,85 @@
+[
+    {
+        "name": "braces",
+        "version": "3.0.3",
+        "files": [
+            {
+                "path": "lib/parse.js",
+                "originalSha256": "e572166565f15fa6ad9865ae49d678218e32aabfd1b3720f6d0d43d39800d310",
+                "patchedSha256": "c39782b743635f77e848ead9522c3a789e53436ddf39380062e64246fbe216fb",
+                "replacements": [
+                    [
+                        "    block = stack[stack.length - 1];\n    value = advance();",
+                        "    if (stack.length > 129) throw new SyntaxError('Brace nesting depth exceeds 128');\n    block = stack[stack.length - 1];\n    value = advance();"
+                    ]
+                ]
+            },
+            {
+                "path": "lib/stringify.js",
+                "originalSha256": "379f22d77bfa1478341ccd49c5e4267464aabcbba03558bab332aac23fc6f23a",
+                "patchedSha256": "3ac0e29263f9ac9b3ac73e9a4ce43b9a66dac0f3916f9d42d3832313afca82f3",
+                "replacements": [
+                    [
+                        "const stringify = (node, parent = {}) => {",
+                        "const stringify = (node, parent = {}, depth = 0) => {\n    if (node.nodes && depth > 128) throw new SyntaxError('Brace nesting depth exceeds 128');\n    if (node.value !== undefined && typeof node.value !== 'string') throw new TypeError('Brace AST values must be strings');\n"
+                    ],
+                    [
+                        "stringify(child);",
+                        "stringify(child, {}, depth + 1);"
+                    ]
+                ]
+            },
+            {
+                "path": "lib/compile.js",
+                "originalSha256": "dc98f22eee3d511785d92a00758d5f0d48efed5f5813bdecc2de430c529b5c9f",
+                "patchedSha256": "c0b43acaf7f8f31ebc9abafe0e5e3074f11d2901a275e09a9912c605d834187b",
+                "replacements": [
+                    [
+                        "const walk = (node, parent = {}) => {",
+                        "const walk = (node, parent = {}, depth = 0) => {\n    if (node.nodes && depth > 128) throw new SyntaxError('Brace nesting depth exceeds 128');\n    if (node.value !== undefined && typeof node.value !== 'string') throw new TypeError('Brace AST values must be strings');\n"
+                    ],
+                    [
+                        "walk(child, node);",
+                        "walk(child, node, depth + 1);"
+                    ]
+                ]
+            },
+            {
+                "path": "lib/expand.js",
+                "originalSha256": "41ccc196ebfa7b7781a634e721eb744e4e7bcb54cba427a7e3d6806a1b9e58f7",
+                "patchedSha256": "973fa5554c09b0859295b6a5446ce01292c551f4dca6d8b03598f695183068b5",
+                "replacements": [
+                    [
+                        "const walk = (node, parent = {}) => {",
+                        "const walk = (node, parent = {}, depth = 0) => {\n    if (node.nodes && depth > 128) throw new SyntaxError('Brace nesting depth exceeds 128');\n    if (node.value !== undefined && typeof node.value !== 'string') throw new TypeError('Brace AST values must be strings');\n"
+                    ],
+                    [
+                        "walk(child, node);",
+                        "walk(child, node, depth + 1);"
+                    ],
+                    [
+                        "      const child = node.nodes[i];",
+                        "      const child = node.nodes[i];\n      if (child.value !== undefined && typeof child.value !== 'string') throw new TypeError('Brace AST values must be strings');"
+                    ]
+                ]
+            }
+        ]
+    },
+    {
+        "name": "node-forge",
+        "version": "1.4.0",
+        "files": [
+            {
+                "path": "lib/rsa.js",
+                "originalSha256": "fd4740238145ec26470eb3f06a627c72039538ce1307dbdce40521f94dfd0a50",
+                "patchedSha256": "96237b930a3ea0ab94b28705c6ad9d995f5313d960e5ee8418c71e7ba37056e1",
+                "replacements": [
+                    [
+                        "            obj.value.length !== 2) {",
+                        "            obj.value.length !== 2 ||\n            obj.value[0].value.length < 1 ||\n            obj.value[0].value.length > 2 ||\n            (obj.value[0].value.length === 2 &&\n              (!('parameters' in capture) || capture.parameters.length !== 0))) {"
+                    ]
+                ]
+            }
+        ]
+    }
+]

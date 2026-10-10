@@ -81,7 +81,10 @@
         "nx:dev:threat-prevention": "npx nx run @chkp/threat-prevention-mcp:dev",
         "nx:dev:threat-emulation": "npx nx run @chkp/threat-emulation-mcp:dev",
         "nx:clean:all": "npx nx run-many --target=clean --all",
-        "test:upstream": "npm run build --workspace=@chkp/mcp-utils && esbuild packages/argos-erm/src/session.ts packages/argos-erm/src/constants.ts --outdir=packages/argos-erm/dist --platform=node --format=esm && esbuild packages/cpinfo-analysis/src/paths.ts --outdir=packages/cpinfo-analysis/dist --platform=node --format=esm && esbuild packages/cpview-history-mcp/src/paths.ts --outdir=packages/cpview-history-mcp/dist --platform=node --format=esm && node --test tests/upstream-*.test.mjs"
+        "test:upstream": "npm run build --workspace=@chkp/mcp-utils && esbuild packages/argos-erm/src/session.ts packages/argos-erm/src/constants.ts --outdir=packages/argos-erm/dist --platform=node --format=esm && esbuild packages/cpinfo-analysis/src/paths.ts --outdir=packages/cpinfo-analysis/dist --platform=node --format=esm && esbuild packages/cpview-history-mcp/src/paths.ts --outdir=packages/cpview-history-mcp/dist --platform=node --format=esm && node --test tests/upstream-*.test.mjs",
+        "postinstall": "node scripts-internal/apply-dependency-patches.mjs",
+        "deps:patch": "node scripts-internal/apply-dependency-patches.mjs",
+        "test:dependency-patches": "npm run deps:patch && node --test tests/dependency-patches.test.mjs"
     },
     "keywords": [
         "mcp",
@@ -171,6 +174,10 @@
         "@nx/jest": {
             "minimatch": "^9.0.7"
         },
-        "undici": "^7.30.0"
+        "undici": "^7.30.0",
+        "read-yaml-file": "2.1.0",
+        "@istanbuljs/load-nyc-config": {
+            "js-yaml": "^4.2.0"
+        }
     }
 }
