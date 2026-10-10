@@ -86,6 +86,14 @@ export async function collectGithubApprovalRecords(
     );
   }
 
+  if (!/^[a-f0-9]{40}$/i.test(pr.head.sha))
+    throw new Error("pull request head commit SHA must be a full Git commit SHA");
+  const committedPlan = parseChangePlan(
+    await source.getCommittedChangePlan(input.repository, pr.head.sha),
+  );
+  if (changePlanDigest(committedPlan) !== planSha256)
+    throw new Error("committed change plan does not match the complete change plan");
+
   const reviews = await source.listPullRequestReviews(
     input.repository,
     input.pullRequestNumber,

@@ -1,3 +1,4 @@
+import { bindZod3Tools } from "./register-tool.js";
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SessionContext } from '@chkp/mcp-utils';
@@ -46,7 +47,8 @@ export function registerVulnerabilityTools(
     server: McpServer,
     serverModule: ServerModule
 ): void {
-    server.registerTool(
+    const registerTool = bindZod3Tools(server);
+    registerTool(
         'get_vulnerability_details',
         {
             description: `Get comprehensive details about a specific CVE including exploitability and organizational exposure.
@@ -97,7 +99,7 @@ WHEN TO USE:
         }
     );
 
-    server.registerTool(
+    registerTool(
         'search_vulnerabilities_by_technology',
         {
             description: `Search for vulnerabilities affecting specific technology products and versions.
@@ -107,14 +109,18 @@ WHEN TO USE:
 - User wants to assess risk for particular technology versions
 
 TECHNOLOGY MATCHING:
-- Product names should match common software names (case-insensitive)
+- technology_name is matched against the CPE product token, without the
+  vendor: use "http_server" (not "Apache HTTP Server"), "log4j" (not
+  "Apache Log4j"), "nginx", "openssh". Matching is case-insensitive.
+- A vendor-prefixed or spaced product name (e.g. "Apache HTTP Server")
+  may return zero results; retry with the CPE product token.
 - Version strings work best as they appear in CVE databases; vendor suffixes
   (e.g. OpenSSH "9.6p1") are also searched by their numeric core ("9.6")`,
             inputSchema: {
                 technology_name: z
                     .string()
                     .describe(
-                        'Software product name (e.g., "Apache HTTP Server", "MySQL").'
+                        'CPE product token without the vendor (e.g., "http_server", "log4j", "nginx", "openssh"). Case-insensitive.'
                     ),
                 technology_versions: z
                     .union([z.string(), z.array(z.string())])

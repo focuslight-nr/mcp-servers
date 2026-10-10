@@ -28,6 +28,7 @@ export class DocumentationToolSettings extends Settings {
 
     static fromHeaders(headers: Record<string, string | string[]>): DocumentationToolSettings {
         return new DocumentationToolSettings({
+            useEnvironmentDefaults: false,
             clientId: getHeaderValue(headers, 'CLIENT-ID'),
             secretKey: getHeaderValue(headers, 'SECRET-KEY'),
             region: getHeaderValue(headers, 'REGION'),

@@ -1,21 +1,19 @@
+import { bindZod3Tools } from "./register-tool.js";
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SessionContext } from '@chkp/mcp-utils';
 import { ASSET_CONFIG_API_BASE } from '../constants.js';
 import { parseListParam } from '../schemas.js';
 import { enrichAssetsWithTechnologies } from '../helpers/enrichment.js';
-import {
-    resolveSpecificCustomerId,
-    populateCustomers,
-    getCustomers,
-} from '../session.js';
+import { resolveSpecificCustomerId } from '../session.js';
 import type { ServerModule } from './types.js';
 
 export function registerAssetTools(
     server: McpServer,
     serverModule: ServerModule
 ): void {
-    server.registerTool(
+    const registerTool = bindZod3Tools(server);
+    registerTool(
         'get_assets',
         {
             description: `Retrieve and explore the organization's digital asset inventory with comprehensive filtering.
@@ -96,16 +94,12 @@ MULTI-TENANT:
                     serverModule,
                     extra
                 );
-
-                if (getCustomers().length === 0) {
-                    await populateCustomers(apiManager);
-                }
-
                 const resolved = await resolveSpecificCustomerId(
                     apiManager,
                     'Asset inventory',
                     customer_id,
-                    server
+                    server,
+                    extra
                 );
 
                 const assetTypeList = parseListParam(asset_type);

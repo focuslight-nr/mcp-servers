@@ -1,3 +1,4 @@
+import { bindZod3Tools } from "./register-tool.js";
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SessionContext } from '@chkp/mcp-utils';
@@ -32,8 +33,9 @@ export function registerThreatIntelTools(
     server: McpServer,
     serverModule: ServerModule
 ): void {
+    const registerTool = bindZod3Tools(server);
     // get_threat_landscape_metadata
-    server.registerTool(
+    registerTool(
         'get_threat_landscape_metadata',
         {
             description: `Get all available filter options for threat intelligence news search.
@@ -80,7 +82,7 @@ WHEN TO USE:
     );
 
     // get_threat_landscape_news
-    server.registerTool(
+    registerTool(
         'get_threat_landscape_news',
         {
             description: `Retrieve curated threat intelligence news and security reports with advanced filtering.
@@ -221,7 +223,7 @@ WHEN TO USE:
     );
 
     // get_threat_actors_metadata
-    server.registerTool(
+    registerTool(
         'get_threat_actors_metadata',
         {
             description: `Get all available filter options for most active threat actors search.
@@ -268,7 +270,7 @@ WHEN TO USE:
     );
 
     // get_most_active_threat_actors
-    server.registerTool(
+    registerTool(
         'get_most_active_threat_actors',
         {
             description: `Retrieve most active threat actors with filtering by countries and sectors.
@@ -344,7 +346,7 @@ WHEN TO USE:
     );
 
     // get_threat_actor_by_id
-    server.registerTool(
+    registerTool(
         'get_threat_actor_by_id',
         {
             description: `Retrieve comprehensive details for a specific threat actor by its ID.
@@ -403,7 +405,7 @@ WHEN TO USE:
     );
 
     // get_malware_by_id
-    server.registerTool(
+    registerTool(
         'get_malware_by_id',
         {
             description: `Retrieve comprehensive details for a specific malware by its ID.

@@ -34,6 +34,7 @@ export class Settings extends InfraSettings {
     const region = getHeaderValue(headers, 'REGION');
     Settings.requireCreds(clientId, accessKey, gateway);
     return new Settings({
+      useEnvironmentDefaults: false,
       clientId,
       secretKey: accessKey,
       gatewayUrl: gateway,

@@ -25,12 +25,12 @@
     "build:tsc": "npx tsc && npx shx chmod +x ./dist/index.js",
     "dev": "tsc --watch",
     "start": "node dist/index.js",
-    "test": "npm run clean && npm run build:tsc && node --test dist/config.test.js dist/marker.test.js dist/adapter.test.js dist/github-client.test.js dist/mcp.integration.test.js"
+    "test": "npm run clean && npm run build:tsc && node --test dist/config.test.js dist/marker.test.js dist/adapter.test.js dist/approval-binding.test.js dist/github-client.test.js dist/github-client-plan.test.js dist/mcp.integration.test.js"
   },
   "dependencies": {
     "@focuslight-nr/checkpoint-baseline-change-executor-mcp": "0.1.0",
     "@focuslight-nr/checkpoint-baseline-change-planner-mcp": "0.1.0",
-    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@modelcontextprotocol/sdk": "^1.31.0",
     "zod": "^3.24.4"
   },
   "devDependencies": {

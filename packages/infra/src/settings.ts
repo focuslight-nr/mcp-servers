@@ -62,21 +62,24 @@ export class Settings {
   }
 
   constructor({
-    apiKey = process.env.API_KEY,
-    username = process.env.USERNAME,
-    password = process.env.PASSWORD,
-    s1cUrl = process.env.S1C_URL,
-    managementHost = process.env.MANAGEMENT_HOST,
-    managementPort = process.env.MANAGEMENT_PORT || '443',
-    cloudInfraToken = process.env.CLOUD_INFRA_TOKEN,
-    cloudConnected = process.env.CLOUD_CONNECTED === 'true',
+    useEnvironmentDefaults = true,
+    apiKey = useEnvironmentDefaults ? process.env.API_KEY : undefined,
+    username = useEnvironmentDefaults ? process.env.USERNAME : undefined,
+    password = useEnvironmentDefaults ? process.env.PASSWORD : undefined,
+    s1cUrl = useEnvironmentDefaults ? process.env.S1C_URL : undefined,
+    managementHost = useEnvironmentDefaults ? process.env.MANAGEMENT_HOST : undefined,
+    managementPort = (useEnvironmentDefaults ? process.env.MANAGEMENT_PORT : undefined) || '443',
+    cloudInfraToken = useEnvironmentDefaults ? process.env.CLOUD_INFRA_TOKEN : undefined,
+    cloudConnected = useEnvironmentDefaults && process.env.CLOUD_CONNECTED === 'true',
     sid,
-    clientId = process.env.CLIENT_ID,
-    secretKey = process.env.SECRET_KEY,
-    region = (process.env.REGION as Region) || 'EU',
-    devPort = process.env.DEV_PORT || '8006',
+    clientId = useEnvironmentDefaults ? process.env.CLIENT_ID : undefined,
+    secretKey = useEnvironmentDefaults ? process.env.SECRET_KEY : undefined,
+    region = (useEnvironmentDefaults ? process.env.REGION as Region : undefined) || 'EU',
+    devPort = (useEnvironmentDefaults ? process.env.DEV_PORT : undefined) || '8006',
     gatewayUrl,
   }: {
+    /** HTTP factories disable process configuration fallback for tenant isolation. */
+    useEnvironmentDefaults?: boolean;
     apiKey?: string;
     username?: string;
     password?: string;
@@ -208,7 +211,7 @@ export class Settings {
    */
 
 
-  private validate(): void {
+  protected validate(): void {
     const verbose = SettingsManager.globalDebugState;
 
     if (verbose) {
@@ -384,6 +387,7 @@ export class Settings {
     }
 
     return new Settings({
+      useEnvironmentDefaults: false,
       apiKey: extractedValues.apiKey,
       username: extractedValues.username,
       password: extractedValues.password,

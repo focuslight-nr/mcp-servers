@@ -1,3 +1,4 @@
+import { bindZod3Tools } from "./register-tool.js";
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SessionContext } from '@chkp/mcp-utils';
@@ -115,9 +116,10 @@ async function requestAlerts(
 
 async function fanoutAlerts(
     apiManager: ArgosERMAPIManager,
-    opts: AlertQueryOptions
+    opts: AlertQueryOptions,
+    extra?: unknown
 ): Promise<AlertResult> {
-    const regions = allRegions();
+    const regions = allRegions(extra);
     const regionCount = Math.max(regions.length, 1);
     const perRegionLimit = Math.max(
         10,
@@ -176,26 +178,28 @@ async function routeAlertQuery(
     apiManager: ArgosERMAPIManager,
     mcpServer: McpServer,
     customerId: string | undefined,
-    opts: AlertQueryOptions
+    opts: AlertQueryOptions,
+    extra?: unknown
 ): Promise<AlertResult> {
     const resolved = await ensureSessionCustomer(
         apiManager,
         mcpServer,
-        customerId
+        customerId,
+        extra
     );
 
     if (resolved !== ALL_SENTINEL && resolved !== UNSET_SENTINEL) {
-        const region = customerRegion(resolved);
+        const region = customerRegion(resolved, extra);
         const basePath = region === 'EU' ? EU_ALERT_API_BASE : ALERT_API_BASE;
-        const envName = findCustomerDisplayName(resolved);
+        const envName = findCustomerDisplayName(resolved, extra);
         return requestAlerts(apiManager, basePath, [envName], opts);
     }
 
-    if (hasMixedRegions()) {
-        return fanoutAlerts(apiManager, opts);
+    if (hasMixedRegions(extra)) {
+        return fanoutAlerts(apiManager, opts, extra);
     }
 
-    const regions = allRegions();
+    const regions = allRegions(extra);
     const basePath = regions[0] === 'EU' ? EU_ALERT_API_BASE : ALERT_API_BASE;
     return requestAlerts(apiManager, basePath, null, opts);
 }
@@ -230,8 +234,9 @@ export function registerAlertTools(
     server: McpServer,
     serverModule: ServerModule
 ): void {
+    const registerTool = bindZod3Tools(server);
     // get_alert_metadata
-    server.registerTool(
+    registerTool(
         'get_alert_metadata',
         {
             description: `Get all available alert categories, types, and subtypes for alert filtering.
@@ -283,7 +288,7 @@ PURPOSE:
     );
 
     // get_alerts
-    server.registerTool(
+    registerTool(
         'get_alerts',
         {
             description: `Search and retrieve security alerts with comprehensive filtering options.
@@ -387,7 +392,8 @@ MULTI-TENANT:
                         toCreatedDate: to_created_date,
                         limit,
                         page,
-                    }
+                    },
+                    extra
                 );
 
                 if (
@@ -454,7 +460,7 @@ MULTI-TENANT:
     );
 
     // get_alert_details
-    server.registerTool(
+    registerTool(
         'get_alert_details',
         {
             description: `Retrieve comprehensive details for a specific security alert by its ID.

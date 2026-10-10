@@ -34,7 +34,7 @@ export class DocToolClient {
      * Get credentials for Documentation Tool.
      * Uses DOC_TOOL_CLIENT_ID/DOC_TOOL_SECRET_KEY if provided, otherwise falls back to WAF credentials.
      */
-    private getDocToolCredentials(): { clientId: string; secretKey: string } {
+    private getDocToolCredentials(): { clientId?: string; secretKey?: string } {
         return {
             clientId: this.settings.docToolClientId || this.settings.clientId,
             secretKey: this.settings.docToolSecretKey || this.settings.secretKey,

@@ -1,22 +1,20 @@
+import { bindZod3Tools } from "./register-tool.js";
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SessionContext } from '@chkp/mcp-utils';
 import { TAKEDOWN_API_BASE } from '../constants.js';
 import { parseListParam } from '../schemas.js';
-import {
-    resolveSpecificCustomerId,
-    populateCustomers,
-    getCustomers,
-} from '../session.js';
+import { resolveSpecificCustomerId } from '../session.js';
 import type { ServerModule } from './types.js';
 
 export function registerTakedownTools(
     server: McpServer,
     serverModule: ServerModule
 ): void {
+    const registerTool = bindZod3Tools(server);
     /* eslint-disable @typescript-eslint/ban-ts-comment */
     // @ts-ignore TS2589 — MCP SDK Zod3/4 compat causes deep type instantiation
-    server.registerTool(
+    registerTool(
         'get_takedown_requests',
         {
             description: `Retrieve active takedown requests for the customer.
@@ -90,16 +88,12 @@ RETURNS:
                     serverModule,
                     extra
                 );
-
-                if (getCustomers().length === 0) {
-                    await populateCustomers(apiManager);
-                }
-
                 const resolved = await resolveSpecificCustomerId(
                     apiManager,
                     'Takedown requests',
                     customer_id,
-                    server
+                    server,
+                    extra
                 );
 
                 const filters: Record<string, unknown> = {};

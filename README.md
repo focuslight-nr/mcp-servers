@@ -123,6 +123,12 @@ npm install
 npm run build
 ```
 
+Dependency installation configures the repository hooks but no longer installs
+`npm-merge-driver`. Resolve lockfile merge conflicts using normal Git conflict
+resolution, then regenerate the lockfile with `npm install --package-lock-only --ignore-scripts`.
+The Nx plugins remain on 23.0.2 to support the existing ESLint 8 configuration;
+the Nx core is updated independently to 23.3.0.
+
 ## Nx Workspace Commands
 
 This project uses Nx for managing the monorepo. You can use Nx commands to run tasks for specific packages:

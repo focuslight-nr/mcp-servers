@@ -35,7 +35,7 @@ interface ObjectTypeConfig {
 function formatErrorForTool(err: unknown): string {
     const msg = err instanceof Error ? err.message : String(err);
     const parts = [msg];
-    if (err instanceof Error && err.cause) {
+    if (err instanceof Error && 'cause' in err && err.cause) {
         const c = err.cause;
         if (c instanceof Error) {
             parts.push(`cause: ${c.message}`);

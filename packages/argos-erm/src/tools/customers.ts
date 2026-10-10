@@ -1,3 +1,4 @@
+import { bindZod3Tools } from "./register-tool.js";
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SessionContext } from '@chkp/mcp-utils';
@@ -15,7 +16,8 @@ export function registerCustomerTools(
     server: McpServer,
     serverModule: ServerModule
 ): void {
-    server.registerTool(
+    const registerTool = bindZod3Tools(server);
+    registerTool(
         'list_customers',
         {
             description: `List all available customers/tenants for this integration token.
@@ -34,8 +36,8 @@ Returns the full list with an "ALL" option prepended.`,
                     extra
                 );
 
-                if (getCustomers().length === 0) {
-                    await populateCustomers(apiManager);
+                if (getCustomers(extra).length === 0) {
+                    await populateCustomers(apiManager, extra);
                 }
 
                 const customers = [
@@ -43,18 +45,19 @@ Returns the full list with an "ALL" option prepended.`,
                         customer_id: ALL_SENTINEL,
                         display_name: 'All customers',
                     },
-                    ...getCustomers().map((c) => ({
+                    ...getCustomers(extra).map((c) => ({
                         customer_id: c.customer_id,
                         display_name: c.display_name,
                     })),
                 ];
 
-                const session = getSession();
+                const session = getSession(extra);
                 const activeCustomer =
                     session.customer_id === UNSET_SENTINEL
                         ? {
                               customer_id: UNSET_SENTINEL,
-                              display_name: 'Not selected (will prompt on first use)',
+                              display_name:
+                                  'Not selected (will prompt on first use)',
                           }
                         : {
                               customer_id: session.customer_id,
@@ -90,7 +93,7 @@ Returns the full list with an "ALL" option prepended.`,
         }
     );
 
-    server.registerTool(
+    registerTool(
         'select_customer',
         {
             description: `Switch the active customer/tenant for this session.
@@ -116,12 +119,12 @@ Pass a customer_id from list_customers. Pass "ALL" to query all customers.`,
                     extra
                 );
 
-                if (getCustomers().length === 0) {
-                    await populateCustomers(apiManager);
+                if (getCustomers(extra).length === 0) {
+                    await populateCustomers(apiManager, extra);
                 }
 
                 if (customer_id === ALL_SENTINEL) {
-                    resetSession();
+                    resetSession(extra);
                     return {
                         content: [
                             {
@@ -132,11 +135,11 @@ Pass a customer_id from list_customers. Pass "ALL" to query all customers.`,
                     };
                 }
 
-                const customer = getCustomers().find(
+                const customer = getCustomers(extra).find(
                     (c) => c.customer_id === customer_id
                 );
                 if (!customer) {
-                    const available = getCustomers()
+                    const available = getCustomers(extra)
                         .map((c) => `${c.display_name} (${c.customer_id})`)
                         .join(', ');
                     return {
@@ -149,11 +152,14 @@ Pass a customer_id from list_customers. Pass "ALL" to query all customers.`,
                     };
                 }
 
-                setSession({
-                    customer_id: customer.customer_id,
-                    display_name: customer.display_name,
-                    region: customer.region,
-                });
+                setSession(
+                    {
+                        customer_id: customer.customer_id,
+                        display_name: customer.display_name,
+                        region: customer.region,
+                    },
+                    extra
+                );
 
                 return {
                     content: [

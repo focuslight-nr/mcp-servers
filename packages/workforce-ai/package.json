@@ -1,7 +1,7 @@
 {
   "name": "@chkp/workforce-ai-mcp",
   "version": "1.2.0",
-  "description": "Official MCP server for Check Point Workforce AI — AI & Browse security policy management, asset visibility, and app catalog",
+  "description": "Official MCP server for Check Point Workforce AI \u2014 AI & Browse security policy management, asset visibility, and app catalog",
   "repository": {
     "type": "git",
     "url": "https://github.com/CheckPointSW/mcp-servers.git",
@@ -34,8 +34,8 @@
   "dependencies": {
     "@chkp/mcp-utils": "*",
     "@chkp/quantum-infra": "*",
-    "@modelcontextprotocol/sdk": "^1.26.0",
-    "axios": "^1.13.5",
+    "@modelcontextprotocol/sdk": "^1.31.0",
+    "axios": "^1.20.0",
     "commander": "^13.1.0",
     "node-machine-id": "^1.1.12",
     "zod": "^3.24.4"
@@ -46,7 +46,7 @@
     "json-schema-to-zod": "^2.6.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.0",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.11"
   },
   "keywords": [
     "mcp",

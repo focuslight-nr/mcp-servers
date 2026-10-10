@@ -102,6 +102,7 @@ Package: `packages/github-approval-adapter`
 
 - Reads pull requests and reviews through the GitHub REST API using an environment-only, read-only credential.
 - Requires exact repository, base branch, reviewer, and optional label allowlists plus an exact plan marker in the pull request body.
+- Reads the complete plan from `.checkpoint/change-plan.json` at the reviewed head commit and compares its canonical digest with the supplied plan; body-only plans fail closed. The read-only token also requires Contents: read.
 - Accepts only the latest review per human reviewer for the current head commit, rejects self-approval and fork pull requests, and emits expiring Approval Record Format v1 artifacts.
 - Uses the stable GitHub numeric user ID as the approval subject and retains the review URL as provenance.
 - Has no GitHub write operation, Check Point client, target credential, or configuration-write tool.
