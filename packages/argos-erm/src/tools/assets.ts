@@ -1,3 +1,4 @@
+import { bindZod3Tools } from "./register-tool.js";
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SessionContext } from '@chkp/mcp-utils';
@@ -11,7 +12,8 @@ export function registerAssetTools(
     server: McpServer,
     serverModule: ServerModule
 ): void {
-    server.registerTool(
+    const registerTool = bindZod3Tools(server);
+    registerTool(
         'get_assets',
         {
             description: `Retrieve and explore the organization's digital asset inventory with comprehensive filtering.

@@ -10,9 +10,9 @@ import {
     auditWriteDecision,
     WriteOperationBlockedError,
 } from './graphql-guard.js';
-import { runGetObjects } from './tools/get-objects.js';
-import { runManageObjects } from './tools/manage-objects.js';
-import { runWafConsultant } from './tools/waf-consultant.js';
+import { runGetObjects, type GetObjectsParams } from './tools/get-objects.js';
+import { runManageObjects, type ManageObjectsParams } from './tools/manage-objects.js';
+import { runWafConsultant, type RunWafConsultantParams } from './tools/waf-consultant.js';
 
 const { server, pkg } = createMcpServer(import.meta.url, {
     description: 'Check Point WAF MCP server for Check Point WAF management',
@@ -304,7 +304,7 @@ server.tool(
         filters: z.record(z.any()).optional().describe('Optional filters: matchSearch, sortBy, practiceType, etc.'),
         auto_detect: z.boolean().optional().describe('Enable auto-detection from user_intent (default: true).'),
     },
-    async (params, extra: { sessionId?: string }) => {
+    async (params: GetObjectsParams, extra: { sessionId?: string }) => {
         const apiManager = SessionContext.getAPIManager(serverModule, extra);
         const settings = SessionContext.getSettings(serverModule, extra);
         return runGetObjects(apiManager, params, settings);
@@ -349,7 +349,7 @@ server.tool(
         ownerId: z.string().optional().describe('Asset ID that owns the object. Required for Local visibility practices and behaviors. Local behaviors (with ownerId) cascade-delete when the owning asset is deleted and cannot be independently deleted via deleteBehavior.'),
         data: z.record(z.any()).optional().describe('Object-specific data for create/update.'),
     },
-    async (params, extra: { sessionId?: string }) => {
+    async (params: ManageObjectsParams, extra: { sessionId?: string }) => {
         const settings = SessionContext.getSettings(serverModule, extra) as Settings;
         if (!settings.allowWrites) {
             return writeAccessDenied('manage_objects');
@@ -379,7 +379,7 @@ server.tool(
             .describe('List of available tools that can be recommended.'),
         conversation_context: z.string().optional().describe('Short summary of prior conversation.'),
     },
-    async (params, extra: { sessionId?: string }) => {
+    async (params: RunWafConsultantParams, extra: { sessionId?: string }) => {
         const settings = SessionContext.getSettings(serverModule, extra);
         return runWafConsultant(params, settings);
     }

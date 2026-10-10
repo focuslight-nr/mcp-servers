@@ -1,3 +1,4 @@
+import { bindZod3Tools } from "./register-tool.js";
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SessionContext } from '@chkp/mcp-utils';
@@ -49,7 +50,8 @@ export function registerCredentialTools(
     server: McpServer,
     serverModule: ServerModule
 ): void {
-    server.registerTool(
+    const registerTool = bindZod3Tools(server);
+    registerTool(
         'check_credential_exposure',
         {
             description: `Check for exposed credentials in data breaches by domain or email address.

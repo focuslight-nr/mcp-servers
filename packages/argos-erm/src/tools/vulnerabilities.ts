@@ -1,3 +1,4 @@
+import { bindZod3Tools } from "./register-tool.js";
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SessionContext } from '@chkp/mcp-utils';
@@ -46,7 +47,8 @@ export function registerVulnerabilityTools(
     server: McpServer,
     serverModule: ServerModule
 ): void {
-    server.registerTool(
+    const registerTool = bindZod3Tools(server);
+    registerTool(
         'get_vulnerability_details',
         {
             description: `Get comprehensive details about a specific CVE including exploitability and organizational exposure.
@@ -97,7 +99,7 @@ WHEN TO USE:
         }
     );
 
-    server.registerTool(
+    registerTool(
         'search_vulnerabilities_by_technology',
         {
             description: `Search for vulnerabilities affecting specific technology products and versions.

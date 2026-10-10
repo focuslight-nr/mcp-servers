@@ -211,7 +211,7 @@ export class Settings {
    */
 
 
-  private validate(): void {
+  protected validate(): void {
     const verbose = SettingsManager.globalDebugState;
 
     if (verbose) {

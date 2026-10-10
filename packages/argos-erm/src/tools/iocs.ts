@@ -1,3 +1,4 @@
+import { bindZod3Tools } from "./register-tool.js";
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SessionContext } from '@chkp/mcp-utils';
@@ -80,7 +81,8 @@ export function registerIocTools(
     server: McpServer,
     serverModule: ServerModule
 ): void {
-    server.registerTool(
+    const registerTool = bindZod3Tools(server);
+    registerTool(
         'enrich_iocs',
         {
             description: `Enrich Indicators of Compromise (IOCs) with threat intelligence and reputation data.

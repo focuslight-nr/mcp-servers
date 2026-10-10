@@ -1,3 +1,4 @@
+import { bindZod3Tools } from "./register-tool.js";
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SessionContext } from '@chkp/mcp-utils';
@@ -9,7 +10,8 @@ export function registerAnalyticsTools(
     server: McpServer,
     serverModule: ServerModule
 ): void {
-    server.registerTool(
+    const registerTool = bindZod3Tools(server);
+    registerTool(
         'get_security_analytics',
         {
             description: `Get comprehensive security posture analytics and risk assessment overview.

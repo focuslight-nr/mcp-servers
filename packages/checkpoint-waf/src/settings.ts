@@ -131,7 +131,7 @@ export class Settings extends BaseSettings {
         return '/app/waf/graphql/V1';
     }
 
-    validate(): boolean {
+    override validate(): boolean {
         if (!this.clientId) {
             throw new Error(
                 'Client ID is required (via --client-id or WAF_CLIENT_ID env var)'

@@ -1,3 +1,4 @@
+import { bindZod3Tools } from "./register-tool.js";
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SessionContext } from '@chkp/mcp-utils';
@@ -233,8 +234,9 @@ export function registerAlertTools(
     server: McpServer,
     serverModule: ServerModule
 ): void {
+    const registerTool = bindZod3Tools(server);
     // get_alert_metadata
-    server.registerTool(
+    registerTool(
         'get_alert_metadata',
         {
             description: `Get all available alert categories, types, and subtypes for alert filtering.
@@ -286,7 +288,7 @@ PURPOSE:
     );
 
     // get_alerts
-    server.registerTool(
+    registerTool(
         'get_alerts',
         {
             description: `Search and retrieve security alerts with comprehensive filtering options.
@@ -458,7 +460,7 @@ MULTI-TENANT:
     );
 
     // get_alert_details
-    server.registerTool(
+    registerTool(
         'get_alert_details',
         {
             description: `Retrieve comprehensive details for a specific security alert by its ID.
