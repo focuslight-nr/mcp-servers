@@ -49,7 +49,7 @@ export function pullRequest(
       repo: { full_name: "focuslight-nr/change-approvals" },
     },
     head: {
-      sha: "abc123",
+      sha: "a".repeat(40),
       repo: { full_name: "focuslight-nr/change-approvals" },
     },
     labels: [{ name: "change-plan" }],
@@ -76,16 +76,20 @@ export function review(
     state,
     html_url: `https://github.com/focuslight-nr/change-approvals/pull/42#pullrequestreview-${id}`,
     submitted_at: "2026-08-11T07:30:00.000Z",
-    commit_id: "abc123",
+    commit_id: "a".repeat(40),
     ...overrides,
   };
 }
 
 export class FakeGithubSource implements GithubApprovalSource {
+  public committedPlan: unknown;
   constructor(
     public pr: GithubPullRequest,
     public reviews: GithubReview[],
   ) {}
+  async getCommittedChangePlan(): Promise<unknown> {
+    return this.committedPlan === undefined ? examplePlan() : this.committedPlan;
+  }
   async getPullRequest(): Promise<GithubPullRequest> {
     return this.pr;
   }

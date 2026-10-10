@@ -55,6 +55,16 @@ type FetchLike = (
   init?: RequestInit,
 ) => Promise<Response>;
 
+const committedPlanPath = ".checkpoint/change-plan.json";
+const maximumPlanBytes = 1024 * 1024;
+const committedFileSchema = z.object({
+  type: z.literal("file"),
+  path: z.literal(committedPlanPath),
+  encoding: z.literal("base64"),
+  size: z.number().int().nonnegative().max(maximumPlanBytes),
+  content: z.string().max(Math.ceil(maximumPlanBytes / 3) * 4 * 2),
+});
+
 export class GithubRestClient implements GithubApprovalSource {
   constructor(
     private readonly token: string,
@@ -70,11 +80,29 @@ export class GithubRestClient implements GithubApprovalSource {
         "X-GitHub-Api-Version": "2026-03-10",
       },
       signal: AbortSignal.timeout(15000),
+      redirect: "error",
     });
     if (!response.ok) {
       throw new Error(`GitHub API request failed with HTTP ${response.status}`);
     }
     return response.json();
+  }
+
+  async getCommittedChangePlan(repository: string, commitSha: string): Promise<unknown> {
+    if (!/^[a-f0-9]{40}$/i.test(commitSha))
+      throw new Error("head commit SHA must be a full Git commit SHA");
+    const file = committedFileSchema.parse(
+      await this.get(`/repos/${repository}/contents/${committedPlanPath}?ref=${commitSha}`),
+    );
+    const encoded = file.content.replace(/[\r\n]/g, "");
+    const bytes = Buffer.from(encoded, "base64");
+    if (bytes.length !== file.size || bytes.toString("base64") !== encoded)
+      throw new Error("invalid committed change plan encoding or size");
+    try {
+      return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+    } catch {
+      throw new Error("committed change plan must contain UTF-8 JSON");
+    }
   }
 
   async getPullRequest(

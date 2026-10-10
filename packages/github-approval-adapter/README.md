@@ -15,6 +15,7 @@ The adapter fails closed unless all of the following are true:
 - The requested `owner/repository` exactly matches the configured repository allowlist.
 - The pull request is open, not a draft, targets an allowed base branch, and has the required label when configured.
 - Both the head and base repositories equal the allowed repository; fork pull requests are rejected.
+- The complete plan in `.checkpoint/change-plan.json` at the current head commit matches the supplied plan's canonical SHA-256. Missing or invalid files are rejected.
 - The body contains exactly one machine-readable plan marker matching the plan ID, canonical SHA-256, and complete change ID set.
 - A review belongs to the current pull request head SHA and is the latest submitted review for that user.
 - The reviewer is explicitly allowlisted, is not the pull request author, and is not a bot.
@@ -24,7 +25,7 @@ The adapter fails closed unless all of the following are true:
 
 ## Pull request marker
 
-Put this HTML comment in the pull request body using values emitted by the Planner:
+Commit the complete ChangePlan object (the Planner result's `plan` property, without its result wrapper) to `.checkpoint/change-plan.json` before requesting reviews. The file must contain UTF-8 JSON and be at most 1 MiB. Put this HTML comment in the pull request body using values emitted by the Planner:
 
 ```html
 <!-- checkpoint-change-plan: {"planId":"plan-...","planSha256":"<64 lowercase hex characters>","changeIds":["change-..."]} -->
@@ -43,7 +44,7 @@ GITHUB_APPROVAL_REQUIRED_LABEL=change-plan
 GITHUB_APPROVAL_TTL_SECONDS=3600
 ```
 
-Use a fine-grained token or GitHub App installation token limited to repository Pull requests: read and Metadata: read. Secrets are accepted only from the process environment, never through MCP arguments. The API host is fixed to `https://api.github.com`, requests time out after 15 seconds, and review retrieval is bounded at 1,000 records.
+Use a fine-grained token or GitHub App installation token limited to repository Pull requests: read, Contents: read, and Metadata: read. Existing pull requests containing only a body marker must commit the complete plan and obtain reviews for that commit. Secrets are accepted only from the process environment, never through MCP arguments. The API host is fixed to `https://api.github.com`, requests time out after 15 seconds, and review retrieval is bounded at 1,000 records.
 
 ## Trust boundary
 

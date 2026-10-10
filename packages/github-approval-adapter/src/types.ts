@@ -31,6 +31,7 @@ export interface GithubReview {
 }
 
 export interface GithubApprovalSource {
+  getCommittedChangePlan(repository: string, commitSha: string): Promise<unknown>;
   getPullRequest(
     repository: string,
     pullNumber: number,
