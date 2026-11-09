@@ -58,6 +58,8 @@ This monorepo is organized with each Check Point security domain as a separate M
   - **`/baseline-change-executor`** - Community-developed fake Gaia approval and dry-run receipt MCP
   - **`/github-approval-adapter`** - Community-developed read-only GitHub PR review to Approval Record adapter
   - **`/baseline-audit-runner`** - Community-developed unattended baseline audit runner
+  - **`/cloud-firewall`** - MCP server for Check Point Cloud Firewall management
+  - **`/harmony-email`** - Email Security MCP server for investigating email security events, entities and restore requests
 
 ## Available MCP Servers
 
@@ -83,6 +85,8 @@ The following MCP servers are available in this repository:
 | [Check Point WAF](./packages/checkpoint-waf/)                        | `@chkp/checkpoint-waf-mcp`                               | Query and manage Check Point WAF assets, practices, profiles, zones, and behaviors, and publish enforcement changes                                                                                                             |
 | [CPView History](./packages/cpview-history-mcp/)                     | `@chkp/cpview-history-mcp`                               | Analyze CPView history databases (CPViewDB.dat) for gateway performance, resource utilization, hotspot detection, and incident investigation                                                                                    |
 | [Workforce AI](./packages/workforce-ai/)                             | `@chkp/workforce-ai-mcp`                                 | Query and manage AI & Browse security policy - AI Access, Chats, Agents, and Secure Browsing - plus deployment and user visibility                                                                                              |
+| [Cloud Firewall](./packages/cloud-firewall/)                          | `@chkp/cloud-firewall-mcp`                               | Manage Check Point Cloud Firewall deployments and configuration                                                                                                                                                                  |
+| [Harmony Email](./packages/harmony-email/)                            | `@chkp/harmony-email-mcp`                                | Investigate email security events, entities, and restore requests                                                                                                                                                               |
 | [Gaia Read-only Collector](./packages/gaia-readonly-collector/)      | `@focuslight-nr/checkpoint-gaia-readonly-collector-mcp`  | Collect fixed DNS, DHCP, date/time, and hardening-state observations through a strict read-only Gaia API surface                                                                                                                |
 | [Security Baseline Audit](./packages/baseline-audit/)                | `@focuslight-nr/checkpoint-baseline-audit-mcp`           | Validate and deterministically evaluate organization-authored Baseline Format v1 documents                                                                                                                                      |
 | [Baseline Change Planner](./packages/baseline-change-planner/)       | `@focuslight-nr/checkpoint-baseline-change-planner-mcp`  | Generate immutable, non-executable Change Plan Format v1 proposals from allowlisted failed controls                                                                                                                             |

@@ -1,10 +1,16 @@
 import { bindZod3Tools } from "./register-tool.js";
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { SessionContext } from '@chkp/mcp-utils';
+import {
+    classifyError,
+    McpErrorCode,
+    McpToolError,
+    SessionContext,
+    toolErrorFrom,
+} from '@chkp/mcp-utils';
 import {
     ALERT_API_BASE,
-    EU_ALERT_API_BASE,
+    ALERT_API_BASE_BY_REGION,
     ALL_SENTINEL,
     UNSET_SENTINEL,
 } from '../constants.js';
@@ -21,6 +27,9 @@ import {
 } from '../helpers/region.js';
 import { ensureSessionCustomer } from '../session.js';
 import type { ServerModule } from './types.js';
+import { readJson, readJsonObject } from '../helpers/response.js';
+import { itemError } from '../helpers/item-error.js';
+import { pathSegment } from '../helpers/path.js';
 
 const ALERT_SUMMARY_FIELDS = [
     'ref_id',
@@ -63,6 +72,15 @@ function trimAlerts(data: Record<string, any>): void {
     );
 }
 
+/**
+ * Map a customer region to its alert API base path. A missing or
+ * unrecognised region falls back to US.
+ */
+function alertBasePath(region: string | null | undefined): string {
+    if (!region) return ALERT_API_BASE;
+    return ALERT_API_BASE_BY_REGION[region] ?? ALERT_API_BASE;
+}
+
 async function requestAlerts(
     apiManager: ArgosERMAPIManager,
     basePath: string,
@@ -90,28 +108,37 @@ async function requestAlerts(
 
     try {
         const response = await apiManager.post(`${basePath}/alerts`, payload);
-        const data = await response.json();
-        if (typeof data !== 'object' || data === null) {
-            return { error: 'Invalid response format', raw: data };
-        }
+        const data = await readJsonObject(response);
         enrichAlertsWithIocFlag(data);
         trimAlerts(data);
         return data;
     } catch (err: unknown) {
-        const httpErr = err as { response?: { status?: number } };
+        const httpErr = err as {
+            response?: { status?: number };
+            detail?: unknown;
+        };
         if (
             httpErr.response?.status === 422 &&
-            String(err).includes('Datetime not in range')
+            typeof httpErr.detail === 'string' &&
+            httpErr.detail.includes('Datetime not in range')
         ) {
-            return {
-                error: 'Date range out of bounds',
-                message:
-                    'The requested date range is outside the window supported by the API. ' +
+            throw new McpToolError(
+                McpErrorCode.VALIDATION_ERROR,
+                'Date range out of bounds: the requested date range is outside the window supported by the API. ' +
                     'Please narrow the range — try querying within the last 90 days.',
-            };
+                { upstreamStatus: 422 }
+            );
         }
         throw err;
     }
+}
+
+/** A region's failure in a few words: its code, and the upstream status if any. */
+function describeRegionError(error: unknown): string {
+    const { error_code, upstream_status } = classifyError(error);
+    return upstream_status === undefined
+        ? error_code
+        : `${error_code} (HTTP ${upstream_status})`;
 }
 
 async function fanoutAlerts(
@@ -127,35 +154,35 @@ async function fanoutAlerts(
     );
     const regionOpts = { ...opts, limit: perRegionLimit };
 
-    const regionResults: AlertResult[] = [];
+    const successes: AlertResult[] = [];
+    const errors: unknown[] = [];
 
     for (const region of regions) {
-        const basePath = region === 'EU' ? EU_ALERT_API_BASE : ALERT_API_BASE;
+        const basePath = alertBasePath(region);
         try {
-            const result = await requestAlerts(
-                apiManager,
-                basePath,
-                null,
-                regionOpts
+            successes.push(
+                await requestAlerts(apiManager, basePath, null, regionOpts)
             );
-            regionResults.push(result);
         } catch (err: unknown) {
-            const httpErr = err as { response?: { status?: number } };
-            if (httpErr.response?.status && httpErr.response.status < 500)
+            // A rejected request would be rejected by every region. The status
+            // is read through classifyError, which follows the retry wrapper's
+            // cause to the upstream response.
+            const { upstream_status } = classifyError(err);
+            if (upstream_status !== undefined && upstream_status < 500)
                 throw err;
-            regionResults.push({
-                error: err instanceof Error ? err.constructor.name : 'Error',
-                message: String(err),
-            });
+            if (
+                err instanceof McpToolError &&
+                err.code === McpErrorCode.VALIDATION_ERROR
+            )
+                throw err;
+            errors.push(err);
         }
     }
 
-    if (!regionResults.length) return { alerts: [], total: 0 };
-
-    const errors = regionResults.filter((r) => r.error);
-    const successes = regionResults.filter((r) => !r.error);
-
-    if (!successes.length) return errors[0];
+    if (!successes.length) {
+        if (errors.length) throw errors[0];
+        return { alerts: [], total: 0 };
+    }
 
     const merged: AlertResult = {
         alerts: successes.flatMap((r) => r.alerts ?? []),
@@ -168,7 +195,7 @@ async function fanoutAlerts(
     if (errors.length) {
         merged._fanout_partial_error =
             `${errors.length} region(s) returned errors and were skipped. ` +
-            `First error: ${errors[0].error ?? 'unknown'}`;
+            `First error: ${describeRegionError(errors[0])}`;
     }
 
     return merged;
@@ -189,8 +216,7 @@ async function routeAlertQuery(
     );
 
     if (resolved !== ALL_SENTINEL && resolved !== UNSET_SENTINEL) {
-        const region = customerRegion(resolved, extra);
-        const basePath = region === 'EU' ? EU_ALERT_API_BASE : ALERT_API_BASE;
+        const basePath = alertBasePath(customerRegion(resolved, extra));
         const envName = findCustomerDisplayName(resolved, extra);
         return requestAlerts(apiManager, basePath, [envName], opts);
     }
@@ -200,7 +226,7 @@ async function routeAlertQuery(
     }
 
     const regions = allRegions(extra);
-    const basePath = regions[0] === 'EU' ? EU_ALERT_API_BASE : ALERT_API_BASE;
+    const basePath = alertBasePath(regions[0]);
     return requestAlerts(apiManager, basePath, null, opts);
 }
 
@@ -219,13 +245,13 @@ async function enrichAlertIndicators(
         if (!indicator.id) continue;
         try {
             const resp = await apiManager.get(
-                `${ALERT_API_BASE}/alerts/${refId}/indicators/${indicator.id}`
+                `${ALERT_API_BASE}/alerts/${pathSegment(refId)}/indicators/${pathSegment(indicator.id)}`
             );
-            indicator.intel_item = await resp.json();
+            indicator.intel_item = await readJson(resp);
         } catch (e) {
-            indicator.intel_item = {
-                error: e instanceof Error ? e.message : String(e),
-            };
+            // Intel is optional detail on an alert that was retrieved, so a
+            // failure is recorded on the indicator rather than failing the call.
+            indicator.intel_item = itemError(e);
         }
     }
 }
@@ -261,7 +287,7 @@ PURPOSE:
                 const response = await apiManager.get(
                     `${ALERT_API_BASE}/alerts/metadata`
                 );
-                const data = await response.json();
+                const data = await readJson(response);
                 const types = normalizeMetadata(data);
 
                 return {
@@ -273,16 +299,7 @@ PURPOSE:
                     ],
                 };
             } catch (error) {
-                const msg =
-                    error instanceof Error ? error.message : String(error);
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: `Error retrieving alert metadata: ${msg}`,
-                        },
-                    ],
-                };
+                return toolErrorFrom(error, 'Error retrieving alert metadata');
             }
         }
     );
@@ -415,46 +432,7 @@ MULTI-TENANT:
                     ],
                 };
             } catch (error: unknown) {
-                const httpErr = error as {
-                    response?: {
-                        status?: number;
-                        json(): Promise<unknown>;
-                        text(): Promise<string>;
-                    };
-                };
-                if (httpErr.response) {
-                    let detail: unknown;
-                    try {
-                        detail = await httpErr.response.json();
-                    } catch {
-                        detail = await httpErr.response.text();
-                    }
-                    return {
-                        content: [
-                            {
-                                type: 'text',
-                                text: JSON.stringify(
-                                    {
-                                        error: `Argos API Error (${httpErr.response?.status})`,
-                                        detail,
-                                    },
-                                    null,
-                                    2
-                                ),
-                            },
-                        ],
-                    };
-                }
-                const msg =
-                    error instanceof Error ? error.message : String(error);
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: `Error retrieving alerts: ${msg}`,
-                        },
-                    ],
-                };
+                return toolErrorFrom(error, 'Error retrieving alerts');
             }
         }
     );
@@ -499,23 +477,9 @@ WHEN TO USE:
                 const severitiesList = parseListParam(severities);
 
                 const response = await apiManager.get(
-                    `${ALERT_API_BASE}/alerts/${ref_id}`
+                    `${ALERT_API_BASE}/alerts/${pathSegment(ref_id)}`
                 );
-                const alertData = await response.json();
-
-                if (typeof alertData !== 'object' || alertData === null) {
-                    return {
-                        content: [
-                            {
-                                type: 'text',
-                                text: JSON.stringify({
-                                    error: 'Invalid response format',
-                                    raw: alertData,
-                                }),
-                            },
-                        ],
-                    };
-                }
+                const alertData = await readJsonObject(response);
 
                 if (severitiesList) {
                     const alertSeverity = alertData.alert?.severity;
@@ -561,16 +525,7 @@ WHEN TO USE:
                         ],
                     };
                 }
-                const msg =
-                    error instanceof Error ? error.message : String(error);
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: `Error retrieving alert details: ${msg}`,
-                        },
-                    ],
-                };
+                return toolErrorFrom(error, 'Error retrieving alert details');
             }
         }
     );

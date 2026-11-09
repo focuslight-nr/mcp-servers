@@ -2,16 +2,23 @@ import { getHeaderValue } from '@chkp/mcp-utils';
 import { Settings as BaseSettings } from '@chkp/quantum-infra';
 
 export class Settings extends BaseSettings {
+  /**
+   * Keys whose values debug output may print (see debugView in mcp-utils).
+   * Anything not listed, including every credential, is shown hidden.
+   */
+  static override readonly debugLoggableKeys: readonly string[] = [
+    ...BaseSettings.debugLoggableKeys, 'infinity-portal-url',
+  ];
 
+
+  // Takes only what it is given; fromArgs reads the environment.
   constructor({
-    useEnvironmentDefaults = true,
-    clientId = useEnvironmentDefaults ? process.env.CLIENT_ID : undefined,
-    secretKey = useEnvironmentDefaults ? process.env.SECRET_KEY : undefined,
-    infinityPortalUrl = useEnvironmentDefaults ? process.env.INFINITY_PORTAL_URL : undefined,
-    region = (useEnvironmentDefaults ? process.env.REGION : undefined) || 'EU',
+    clientId,
+    secretKey,
+    infinityPortalUrl,
+    region = 'EU',
     ...baseArgs
   }: {
-    useEnvironmentDefaults?: boolean;
     clientId?: string;
     secretKey?: string;
     /**
@@ -32,7 +39,6 @@ export class Settings extends BaseSettings {
     //  2. Infer and update the region from the URL when possible
     // If infinityPortalUrl is not provided, the base class falls back to region.
     super({
-      useEnvironmentDefaults,
       clientId,
       secretKey,
       region: region as any,
@@ -63,11 +69,12 @@ export class Settings extends BaseSettings {
         'or --region (EU, US, STG, or LOCAL)'
       );
     }
+    const env = process.env;
     return new Settings({
-      clientId: options.clientId,
-      secretKey: options.secretKey,
-      infinityPortalUrl: options.infinityPortalUrl,
-      region: options.region
+      clientId: options.clientId ?? env.CLIENT_ID,
+      secretKey: options.secretKey ?? env.SECRET_KEY,
+      infinityPortalUrl: options.infinityPortalUrl ?? env.INFINITY_PORTAL_URL,
+      region: BaseSettings.hostedRegion(env, options.region ?? env.REGION) ?? options.region ?? (env.REGION || undefined)
     });
   }
 
@@ -78,7 +85,6 @@ export class Settings extends BaseSettings {
     const region = getHeaderValue(headers, 'REGION');
 
     return new Settings({
-      useEnvironmentDefaults: false,
       clientId,
       secretKey,
       infinityPortalUrl,
