@@ -63,7 +63,7 @@ export const fakeGaiaStateSchema = z
     $schema: z.string().optional(),
     target: z.string().min(1),
     capturedAt: z.string().datetime(),
-    observedByControl: z.record(z.string()),
+    observedByControl: z.record(z.string(), z.string()),
     supportedActions: z.array(idSchema).max(100),
     backupAvailable: z.boolean(),
   })
@@ -123,7 +123,7 @@ export const dryRunReceiptSchema = z
         .object({
           changeId: idSchema,
           actionId: idSchema,
-          parameters: z.record(z.unknown()),
+          parameters: z.record(z.string(), z.unknown()),
         })
         .strict(),
     ),

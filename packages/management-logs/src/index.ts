@@ -7,7 +7,11 @@ import {
   createServerModule,
   createApiRunner,
   SessionContext,
-  createMcpServer
+  createMcpServer,
+  McpErrorCode,
+  McpToolError,
+  toolErrorFrom,
+  toolError
 } from '@chkp/mcp-utils';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -44,38 +48,15 @@ server.tool(
       // Get API manager for this session
       const apiManager = SessionContext.getAPIManager(serverModule, extra);
       
-      // Check if environment is MDS
-      const isMds = await apiManager.isMds();
-      
-      if (!isMds) {
-        return { 
-          content: [{ 
-            type: 'text', 
-            text: 'Management server is up and running. The environment is NOT part of Multi Domain system, there is no need to use domain parameters in tool calls.' 
-          }] 
-        };
-      } else {
-        // Get domains for MDS environment
-        const domains = await apiManager.getDomains();
-        
-        // Format domain information
-        const domainList = domains.map((domain: { name: string; type: string }) => `${domain.name} (${domain.type})`).join(', ');
-        
-        return { 
-          content: [{ 
-            type: 'text', 
-            text: `Management server is up and running. The environment is part of Multi Domain system. You need to use the domain parameter for calling APIs, if you are not sure which to use, ask the user. The domains in the system are: ${domainList}` 
-          }] 
-        };
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const environment = await apiManager.describeDomainEnvironment();
       return { 
         content: [{ 
           type: 'text', 
-          text: `Error initializing management connection: ${errorMessage}` 
+          text: `Management server is up and running. ${environment}` 
         }] 
       };
+    } catch (error) {
+        return toolErrorFrom(error, 'Error initializing management connection');
     }
   }
 );
@@ -193,12 +174,7 @@ server.tool(
     }>;
 
     if (!conditions || conditions.length === 0) {
-      return { 
-        content: [{ 
-          type: 'text', 
-          text: 'Error: At least one condition is required to build a query filter.' 
-        }] 
-      };
+      return toolError(McpErrorCode.VALIDATION_ERROR, 'At least one condition is required to build a query filter.');
     }
 
     // Helper function to format a value
@@ -271,6 +247,7 @@ server.tool(
     details_level: z.string().optional(),
     domains_to_process: z.enum(['ALL_DOMAINS_ON_THIS_SERVER', 'CURRENT_DOMAIN']).optional(),
     show_only_local_domain: z.boolean().optional().default(false),
+    domain: z.string().optional().describe('Domain name for Multi-Domain environments.'),
   },
   async (args: Record<string, unknown>, extra: any) => {
     const limit = typeof args.limit === 'number' ? args.limit : 50;
@@ -278,12 +255,13 @@ server.tool(
     const order = Array.isArray(args.order) ? args.order as string[] : undefined;
     const details_level = typeof args.details_level === 'string' ? args.details_level : undefined;
     const domains_to_process = typeof args.domains_to_process === 'string' ? args.domains_to_process : undefined;
+    const domain = typeof args.domain === 'string' && args.domain.trim() !== '' ? args.domain : undefined;
     const params: Record<string, any> = { limit, offset };
     if (order) params.order = order;
     if (details_level) params['details-level'] = details_level;
     if (domains_to_process) { params['domains-to-process'] = [domains_to_process]; params['ignore-warnings'] = true; }
     if (args.show_only_local_domain) params['show-only-local-domain'] = true;
-    const resp = await runApi('POST', 'show-gateways-and-servers', params, extra);
+    const resp = await runApi('POST', 'show-gateways-and-servers', params, extra, domain);
     return { content: [{ type: 'text', text: formatWithPaginationHint(resp) }] };
   }
 );
@@ -467,8 +445,17 @@ server.tool(
       // Get task results using infra function
       const tasksResponses: any[] = [];
       for (const taskId of changesTasks) {
-        const taskResult = await apiManager.getManagementTaskResult(taskId, domain, 4);
-        tasksResponses.push(taskResult);
+        try {
+          tasksResponses.push(await apiManager.getManagementTaskResult(taskId, domain, 4));
+        } catch (error) {
+          // A task still running when polling ends is reported for that task, so
+          // the results of the tasks that did finish are still returned.
+          if (error instanceof McpToolError && error.code === McpErrorCode.TIMEOUT) {
+            tasksResponses.push({ 'task-id': taskId, status: 'in progress', error_code: error.code, message: error.message });
+            continue;
+          }
+          throw error;
+        }
       }
 
       return {
@@ -479,13 +466,7 @@ server.tool(
       };
 
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      return {
-        content: [{
-          type: 'text',
-          text: `Error checking user changes: ${errorMessage}`
-        }]
-      };
+        return toolErrorFrom(error, 'Error checking user changes');
     }
   }
 );

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-export { booleanOptionDefault } from './cli-options.js';
+export { booleanOptionDefault, resolveTransportType } from './cli-options.js';
+export { debugLoggableKeys, debugView, normalizeDebugKey, sessionLogLabel } from './debug-view.js';
 export { launchMCPServer } from './launcher.js';
 export type { ServerConfig, ServerModule, CliOption } from './launcher.js';
 export { SettingsManager } from './settings-manager.js';
@@ -11,8 +12,20 @@ export { createApiRunner, createServerModule, getHeaderValue } from './server-ut
 export { showDialog, showLoginDialog } from './ui-dialog.js';
 export type { DialogConfig, DialogField, DialogResult } from './ui-dialog.js';
 export { trackToolCall, isTelemetryEnabled, getTelemetryUrl, setTransportType } from './telemetry.js';
-export type { TransportType } from './telemetry.js';
-export { CPMcpServer } from './mcp-server.js';
+export type { TransportType, ToolOutcome } from './telemetry.js';
+export {
+  McpErrorCode,
+  McpToolError,
+  toolError,
+  toolErrorFrom,
+  classifyError,
+  classifyHttpStatus,
+  errorForLog,
+  normalizeToolResult,
+  looksLikeUnflaggedError,
+} from './errors.js';
+export type { McpErrorPayload, McpErrorResult, McpToolErrorOptions } from './errors.js';
+export { CPMcpServer, getRequestServer } from './mcp-server.js';
 export { allowAllTools } from './tool-policy.js';
 export type { ToolPolicyCallback } from './tool-policy.js';
 export { readPackageJson, createMcpServer } from './package-utils.js';

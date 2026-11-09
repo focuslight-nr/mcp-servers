@@ -87,26 +87,43 @@ export function resolveSessionWriteAccess(
 }
 
 export class Settings extends BaseSettings {
+    /**
+     * Keys whose values debug output may print (see debugView in mcp-utils).
+     * Anything not listed, including every credential, is shown hidden.
+     */
+    static override readonly debugLoggableKeys: readonly string[] = [
+        ...(BaseSettings.debugLoggableKeys ?? []),
+        'waf-region', 'allow-writes', 'waf-allow-writes', 'doc-source', 'doc-tool-region',
+    ];
+
+    /**
+     * Headers an HTTP session may mix with the operator's values (see
+     * connection-source in mcp-utils). WAF-ALLOW-WRITES is clamped by
+     * resolveSessionWriteAccess, so a header can only drop write access.
+     */
+    static override readonly basicKeys: readonly string[] = [
+        'WAF-REGION', 'WAF-ALLOW-WRITES', 'DOC-SOURCE', 'DOC-TOOL-REGION',
+    ];
+
     readonly docSource?: string;
     readonly docToolClientId?: string;
     readonly docToolSecretKey?: string;
     readonly docToolRegion?: string;
     readonly allowWrites: boolean;
 
+    // Takes only what it is given; fromArgs reads the environment.
     constructor({
-        useEnvironmentDefaults = true,
-        clientId = useEnvironmentDefaults ? process.env.WAF_CLIENT_ID : undefined,
-        accessKey = useEnvironmentDefaults ? process.env.WAF_ACCESS_KEY : undefined,
-        region = (useEnvironmentDefaults ? process.env.WAF_REGION : undefined) || 'EU',
-        docSource = process.env.DOC_SOURCE,
-        docToolClientId = process.env.DOC_TOOL_CLIENT_ID,
-        docToolSecretKey = process.env.DOC_TOOL_SECRET_KEY,
-        docToolRegion = process.env.DOC_TOOL_REGION,
+        clientId,
+        accessKey,
+        region = 'EU',
+        docSource,
+        docToolClientId,
+        docToolSecretKey,
+        docToolRegion,
         // No default: leaving this unset means "inherit the process setting".
         // See the allowWrites assignment below.
         allowWrites,
     }: {
-        useEnvironmentDefaults?: boolean;
         clientId?: string;
         accessKey?: string;
         region?: string;
@@ -116,7 +133,7 @@ export class Settings extends BaseSettings {
         docToolRegion?: string;
         allowWrites?: string | boolean;
     } = {}) {
-        super({ useEnvironmentDefaults, clientId, secretKey: accessKey, region: region as Region });
+        super({ clientId, secretKey: accessKey, region: region as Region });
         this.docSource = docSource;
         this.docToolClientId = docToolClientId;
         this.docToolSecretKey = docToolSecretKey;
@@ -146,13 +163,18 @@ export class Settings extends BaseSettings {
     }
 
     static override fromArgs(options: any): Settings {
+        const env = process.env;
         return new Settings({
-            clientId: options.clientId,
-            accessKey: options.accessKey,
+            clientId: options.clientId ?? env.WAF_CLIENT_ID,
+            accessKey: options.accessKey ?? env.WAF_ACCESS_KEY,
             region:
                 typeof options.region === 'string'
                     ? options.region.toUpperCase()
-                    : undefined,
+                    : env.WAF_REGION || undefined,
+            docSource: env.DOC_SOURCE,
+            docToolClientId: env.DOC_TOOL_CLIENT_ID,
+            docToolSecretKey: env.DOC_TOOL_SECRET_KEY,
+            docToolRegion: env.DOC_TOOL_REGION,
             allowWrites: options.allowWrites,
         });
     }
@@ -161,10 +183,13 @@ export class Settings extends BaseSettings {
         headers: Record<string, string | string[]>
     ): Settings {
         return new Settings({
-            useEnvironmentDefaults: false,
             clientId: getHeaderValue(headers, 'WAF-CLIENT-ID'),
             accessKey: getHeaderValue(headers, 'WAF-ACCESS-KEY'),
             region: getHeaderValue(headers, 'WAF-REGION')?.toUpperCase(),
+            docSource: getHeaderValue(headers, 'DOC-SOURCE'),
+            docToolClientId: getHeaderValue(headers, 'DOC-TOOL-CLIENT-ID'),
+            docToolSecretKey: getHeaderValue(headers, 'DOC-TOOL-SECRET-KEY'),
+            docToolRegion: getHeaderValue(headers, 'DOC-TOOL-REGION'),
             allowWrites: getHeaderValue(headers, 'WAF-ALLOW-WRITES'),
         });
     }

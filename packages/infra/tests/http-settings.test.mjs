@@ -29,15 +29,15 @@ async function withEnv(overrides, callback) {
   }
 }
 
-test('Settings env retention', async () => withEnv({}, async () => {
+test('Settings env retention only through fromArgs', async () => withEnv({}, async () => {
   const s1 = new Settings();
-  assert.equal(s1.apiKey, 'process-api');
-  assert.equal(s1.username, 'process-user');
-  assert.equal(s1.password, 'process-password');
-  assert.equal(s1.clientId, 'process-client');
-  assert.equal(s1.secretKey, 'process-secret');
-  assert.equal(s1.managementHost, 'process-mgmt.invalid');
-  assert.equal(s1.region, 'US');
+  assert.equal(s1.apiKey, undefined);
+  assert.equal(s1.username, undefined);
+  assert.equal(s1.password, undefined);
+  assert.equal(s1.clientId, undefined);
+  assert.equal(s1.secretKey, undefined);
+  assert.equal(s1.managementHost, undefined);
+  assert.equal(s1.region, 'EU');
   const s2 = Settings.fromArgs({});
   assert.equal(s2.apiKey, 'process-api');
   assert.equal(s2.username, 'process-user');
@@ -164,7 +164,7 @@ test('WafSettings', async () => withEnv({}, async () => {
   assert.equal(s.region, 'EU');
   assert.equal(s.apiKey, undefined);
   assert.equal(s.managementHost, undefined);
-  const s2 = new WafSettings();
+  const s2 = WafSettings.fromArgs({});
   assert.equal(s2.clientId, 'process-waf-client');
   assert.equal(s2.secretKey, 'process-waf-secret');
 }));

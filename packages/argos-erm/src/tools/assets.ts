@@ -1,8 +1,9 @@
 import { bindZod3Tools } from "./register-tool.js";
 import { z } from 'zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { SessionContext } from '@chkp/mcp-utils';
+import { SessionContext, toolErrorFrom } from '@chkp/mcp-utils';
 import { ASSET_CONFIG_API_BASE } from '../constants.js';
+import { parseJsonObject } from '../helpers/response.js';
 import { parseListParam } from '../schemas.js';
 import { enrichAssetsWithTechnologies } from '../helpers/enrichment.js';
 import { resolveSpecificCustomerId } from '../session.js';
@@ -152,21 +153,7 @@ MULTI-TENANT:
                         ],
                     };
                 }
-                const assetsData = JSON.parse(rawBody);
-
-                if (typeof assetsData !== 'object' || assetsData === null) {
-                    return {
-                        content: [
-                            {
-                                type: 'text',
-                                text: JSON.stringify({
-                                    error: 'Invalid response format',
-                                    raw: assetsData,
-                                }),
-                            },
-                        ],
-                    };
-                }
+                const assetsData = parseJsonObject(rawBody);
 
                 if (
                     fetch_technologies &&
@@ -190,16 +177,7 @@ MULTI-TENANT:
                     ],
                 };
             } catch (error) {
-                const msg =
-                    error instanceof Error ? error.message : String(error);
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: `Error retrieving assets: ${msg}`,
-                        },
-                    ],
-                };
+                return toolErrorFrom(error, 'Error retrieving assets');
             }
         }
     );

@@ -187,7 +187,7 @@ function toolError(error: unknown): ToolResponse {
 registerTool(
   "validate_baseline",
   "Validate an inline Baseline Format v1 document without evaluating observations or changing a target system.",
-  { baseline: z.record(z.unknown()) },
+  { baseline: z.record(z.string(), z.unknown()) },
   async (args: AuditToolArgs) => {
     try {
       const baseline = parseBaseline(args.baseline);
@@ -222,8 +222,8 @@ registerTool(
   "audit_baseline",
   "Evaluate Baseline Format v1 against normalized observations. The engine never executes code or remediation actions.",
   {
-    baseline: z.record(z.unknown()),
-    observations: z.record(z.unknown()),
+    baseline: z.record(z.string(), z.unknown()),
+    observations: z.record(z.string(), z.unknown()),
     target: z.string().optional(),
     ...outputSchema,
   },
@@ -251,7 +251,7 @@ registerTool(
   "audit_baseline_raw_responses",
   "Normalize supported Check Point Gaia and Management show responses, then evaluate Baseline Format v1 without changing a target system.",
   {
-    baseline: z.record(z.unknown()),
+    baseline: z.record(z.string(), z.unknown()),
     target: z.string().optional(),
     gaia_responses: z
       .object({
@@ -265,7 +265,7 @@ registerTool(
       .object({ access_rulebase_pages: z.array(z.unknown()).optional() })
       .optional(),
     expected_timezone: z.string().optional(),
-    parameters: z.record(z.unknown()).optional(),
+    parameters: z.record(z.string(), z.unknown()).optional(),
     ...outputSchema,
   },
   async (args: RawAuditToolArgs) => {
@@ -399,7 +399,7 @@ registerTool(
 registerTool(
   "list_baseline_controls",
   "Validate Baseline Format v1 and list its controls and remediation metadata.",
-  { baseline: z.record(z.unknown()) },
+  { baseline: z.record(z.string(), z.unknown()) },
   async (args: AuditToolArgs) => {
     try {
       const baseline = parseBaseline(args.baseline);
