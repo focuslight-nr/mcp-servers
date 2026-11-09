@@ -31,7 +31,7 @@ const targetSchema = z.object({
   policyPackage: z.string().optional(),
   accessLayer: z.string().min(1).optional(),
   expectedTimezone: z.string().min(1).optional(),
-  parameters: z.record(z.unknown()).optional().default({}),
+  parameters: z.record(z.string(), z.unknown()).optional().default({}),
   enabled: z.boolean().optional().default(true),
 });
 
@@ -58,8 +58,7 @@ const notificationSchema = z
       .default(["NON_COMPLIANT", "REGRESSION", "PARTIAL", "ERROR"]),
     timeoutMs: z.number().int().min(1000).max(60000).optional().default(10000),
   })
-  .optional()
-  .default({});
+  .prefault({});
 
 const configSchema = z
   .object({

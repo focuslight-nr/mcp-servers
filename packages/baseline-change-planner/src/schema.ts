@@ -13,14 +13,14 @@ const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
     z.boolean(),
     z.null(),
     z.array(jsonValueSchema),
-    z.record(jsonValueSchema),
+    z.record(z.string(), jsonValueSchema),
   ] as const),
 ) as z.ZodType<JsonValue>;
 
 const remediationSchema = z
   .object({
     action: idSchema,
-    parameters: z.record(jsonValueSchema).optional(),
+    parameters: z.record(z.string(), jsonValueSchema).optional(),
   })
   .strict();
 
@@ -57,7 +57,7 @@ const changeSchema = z
     rationale: z.string().min(1),
     evidence: z.array(z.string()),
     action: z
-      .object({ id: idSchema, parameters: z.record(jsonValueSchema) })
+      .object({ id: idSchema, parameters: z.record(z.string(), jsonValueSchema) })
       .strict(),
     risk: z
       .object({

@@ -11,11 +11,17 @@ packages, their build entries and CI; the WAF GraphQL write guard; dependency
 overrides; and the fork's policy of not publishing through upstream release
 workflows. It also adds the upstream Cloud Firewall and Harmony Email packages.
 
+The fork's CI audit initially found newly disclosed vulnerabilities in the
+merged dependency tree. Runtime dependencies were updated to patched releases,
+and the six fork-only packages moved to Zod 4.6.7 with the required schema API
+changes. The production dependency audit now reports zero vulnerabilities.
+
 Validation completed locally:
 
 - HTTP settings regression tests: 12 passed.
 - WAF write guard tests: 6 passed.
 - Upstream regression tests: 8 passed.
+- Dependency patch tests: 7 passed; Argos session test: 1 passed.
 - All six fork-specific package test suites and bundle builds passed.
 - `@chkp/mcp-utils` and `@chkp/quantum-infra` TypeScript builds passed.
 

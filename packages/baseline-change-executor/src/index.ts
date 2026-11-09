@@ -53,9 +53,9 @@ registerTool(
   "dry_run_change_plan",
   "Evaluate an approved Change Plan v1 against a fake Gaia state. This tool never connects to or changes a target.",
   {
-    change_plan: z.record(z.unknown()),
-    approval_records: z.array(z.record(z.unknown())).max(100),
-    fake_state: z.record(z.unknown()),
+    change_plan: z.record(z.string(), z.unknown()),
+    approval_records: z.array(z.record(z.string(), z.unknown())).max(100),
+    fake_state: z.record(z.string(), z.unknown()),
     executor_allowed_actions: z.array(z.string().min(1)).min(1).max(100),
     trusted_approval_issuers: z.array(z.string().min(1)).min(1).max(20),
     max_state_age_seconds: z.number().int().min(1).max(86400),
@@ -91,7 +91,7 @@ registerTool(
 registerTool(
   "validate_approval_record",
   "Validate Approval Record Format v1 without authenticating an identity or changing a target.",
-  { approval_record: z.record(z.unknown()) },
+  { approval_record: z.record(z.string(), z.unknown()) },
   async (args: { approval_record?: unknown }) => {
     try {
       const record = parseApprovalRecord(args.approval_record);
@@ -110,7 +110,7 @@ registerTool(
 registerTool(
   "validate_dry_run_receipt",
   "Validate Dry-run Receipt Format v1 without executing any action.",
-  { dry_run_receipt: z.record(z.unknown()) },
+  { dry_run_receipt: z.record(z.string(), z.unknown()) },
   async (args: { dry_run_receipt?: unknown }) => {
     try {
       const receipt = parseDryRunReceipt(args.dry_run_receipt);

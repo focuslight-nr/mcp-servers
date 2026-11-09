@@ -15,7 +15,7 @@ const baselineValueSchema: z.ZodType<BaselineValue> = z.lazy(() =>
     z.boolean(),
     z.null(),
     z.array(baselineValueSchema),
-    z.record(baselineValueSchema),
+    z.record(z.string(), baselineValueSchema),
   ] as const),
 ) as z.ZodType<BaselineValue>;
 
@@ -100,7 +100,7 @@ const remediationSchema = z
       .string()
       .min(1)
       .regex(/^[A-Za-z0-9_.-]+$/),
-    parameters: z.record(baselineValueSchema).optional(),
+    parameters: z.record(z.string(), baselineValueSchema).optional(),
   })
   .strict();
 

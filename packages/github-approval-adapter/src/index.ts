@@ -32,7 +32,7 @@ registerTool(
   {
     repository: z.string().min(3).max(200),
     pull_request_number: z.number().int().positive(),
-    change_plan: z.record(z.unknown()),
+    change_plan: z.record(z.string(), z.unknown()),
     evaluated_at: z.string().datetime().optional(),
   },
   async (args: {

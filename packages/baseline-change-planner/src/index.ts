@@ -49,7 +49,7 @@ registerTool(
   "plan_audit_remediation",
   "Generate a non-executable Change Plan Format v1 proposal from a read-only audit report. Only explicitly allowlisted action IDs are included.",
   {
-    audit_report: z.record(z.unknown()),
+    audit_report: z.record(z.string(), z.unknown()),
     allowed_actions: z.array(z.string().min(1)).min(1),
     audit_id: z.string().min(1).optional(),
     generated_at: z.string().datetime().optional(),
@@ -78,7 +78,7 @@ registerTool(
 registerTool(
   "validate_change_plan",
   "Validate Change Plan Format v1 without approving or executing any change.",
-  { change_plan: z.record(z.unknown()) },
+  { change_plan: z.record(z.string(), z.unknown()) },
   async (args: { change_plan?: unknown }) => {
     try {
       const plan = parseChangePlan(args.change_plan);
