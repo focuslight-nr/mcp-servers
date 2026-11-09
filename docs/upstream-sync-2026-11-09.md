@@ -21,6 +21,8 @@ Validation completed locally:
 - HTTP settings regression tests: 12 passed.
 - WAF write guard tests: 6 passed.
 - Upstream regression tests: 8 passed.
+- Upstream regression fixture also passed after cleaning Argos build output;
+  its test script now bundles the local Argos helpers needed on fresh checkouts.
 - Dependency patch tests: 7 passed; Argos session test: 1 passed.
 - All six fork-specific package test suites and bundle builds passed.
 - `@chkp/mcp-utils` and `@chkp/quantum-infra` TypeScript builds passed.
